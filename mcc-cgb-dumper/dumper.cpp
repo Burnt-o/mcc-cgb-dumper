@@ -4,6 +4,11 @@
 #include "CGBobject_parsed.h"
 namespace dumper
 {
+
+
+
+
+
 	namespace // private vars
 	{
 		pointer p_CGBobject_array({0x03F7FF18 , 0x40, 0x0}); // the beginning of the array of CGB objects
@@ -12,9 +17,11 @@ namespace dumper
 		// the following pointers will be relative to the current CGBobject that we're iterating on, as set by updateBaseAddress
 		std::vector<pointer*> CGBmembers;
 		pointer p_CGBmember_isValid(nullptr, { 0x10 }); //byte equal to 0x10 if valid, 0x0 if not
+		pointer p_CGBmember_customGameName(nullptr, { 0x20 });
 		pointer p_CGBmember_playersInGame(nullptr, { 0x120 });
 		pointer p_CGBmember_maxPlayers(nullptr, { 0x121 });
 		pointer p_CGBmember_pingMilliseconds(nullptr, { 0x124 });
+
 
 		bool CGBmemberpointers_initialized = false;
 		void init_CGBmemberpointers()
@@ -22,9 +29,11 @@ namespace dumper
 			PLOG_VERBOSE << "Initializing CGB memberpointers";
 			// All we're doing is adding them all to the vector, this only needs to be done once
 			CGBmembers.push_back(&p_CGBmember_isValid);
+			CGBmembers.push_back(&p_CGBmember_customGameName);
 			CGBmembers.push_back(&p_CGBmember_playersInGame);
 			CGBmembers.push_back(&p_CGBmember_maxPlayers);
 			CGBmembers.push_back(&p_CGBmember_pingMilliseconds);
+
 		}
 
 		void update_CGBmemberpointers(void* p_CGBobject)
@@ -38,7 +47,7 @@ namespace dumper
 	}
 
 
-	
+	// Reads data at void* of type T, converts it to a string
 	template <typename T>
 	std::string parseCGBmember(void* pMember, T type)
 	{
@@ -47,22 +56,39 @@ namespace dumper
 		return std::to_string(data);
 	}
 
-	//overloads
+	// Overload that resolves a pointer object first then does above
 	template <typename T>
 	std::string parseCGBmember(pointer& p, T type)
 	{
 		std::optional<void*> pMember = p.resolve();
 		return pMember.has_value() ? parseCGBmember(pMember.value(), type) : "NULL";
+
 	}
 
-	template <typename T>
-	std::string parseCGBmember(recursive_string_pointer& p, T type)
+	// String case, needs to be able to handle both MCC's short-string-optimization technique, and regular long strings.
+	// Basically the short strings (less than 16 bytes) are stored as char* right there and then.
+	// And the long strings instead store a pointer to the char* where they have more space.
+	std::string parseString(pointer& p)
 	{
 		std::optional<void*> pMember = p.resolve();
-		return pMember.has_value() ? parseCGBmember(pMember.value(), type) : "NULL";
+
+		if (!pMember.has_value()) return "NULL";
+		PLOG_DEBUG << "PARSING STRING AT " << pMember.value();
+		int strLength = *(int*)(((uintptr_t)pMember.value()) + 0x10); // int value of string length is stored at +0x10 from string start
+		PLOG_DEBUG << "PARSING STRING, length: " << strLength;
+		if (strLength < 0x10) // TODO: double check if it should be "less than 0x10", or "less than or equal to 0x10")
+		{
+			PLOG_VERBOSE << "short string case";
+			//short string case
+			return (char*)pMember.value(); // our void* is actually the char*, so we can return that (automatically converts to a new std::string on return)
+		}
+		else
+		{
+			PLOG_VERBOSE << "long string case";
+			//long string case. follow the pointer to the real char* (ie we're dealing with a char**)
+			return *(char**)pMember.value();
+		}
 	}
-
-
 	void dump()
 	{
 		if (!CGBmemberpointers_initialized) 
@@ -110,6 +136,7 @@ namespace dumper
 			parse->AddData("PlayersInGame", parseCGBmember(p_CGBmember_playersInGame, (char)NULL));
 			parse->AddData("MaxPlayers", parseCGBmember(p_CGBmember_maxPlayers, (char)NULL));
 			parse->AddData("PingMilliseconds", parseCGBmember(p_CGBmember_pingMilliseconds, (uint32_t)NULL));
+			parse->AddData("CustomGameName", parseString(p_CGBmember_customGameName));
 			//TODO: the rest of the members
 			//TODO: test if recursive string thing works
 			
@@ -125,11 +152,13 @@ namespace dumper
 		for (CGBobject_parsed* CGdata : parsedData)
 		{
 			// TODO: parse all this crap to xml or json instead of just logging it to the console 
+			for (auto& [key, value] : CGdata->mData)
+			{
+				PLOG_VERBOSE << key << ": " << value;
+			}
+			
 
-			PLOG_VERBOSE << "Index: " << CGdata->GetData("Index");
-			PLOG_VERBOSE << "Current players: " << CGdata->GetData("PlayersInGame");
-			PLOG_VERBOSE << "MaxPlayers: " << CGdata->GetData("MaxPlayers");
-			PLOG_VERBOSE << "Ping: " << CGdata->GetData("PingMilliseconds");
+
 		}
 
 		PLOG_INFO << "Dump finished successfully!";

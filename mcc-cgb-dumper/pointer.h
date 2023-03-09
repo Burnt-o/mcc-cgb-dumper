@@ -31,22 +31,3 @@ public:
 
 
 
-class recursive_string_pointer {
-private:
-	pointer* mPointer;
-	std::optional<void*> recursivelyGetStringPointer(void* address, int recursionLevel);
-
-public:
-	std::optional<void*> resolve()
-	{
-		std::optional<void*> pointerRes = mPointer->resolve();
-		if (!pointerRes.has_value()) return std::nullopt;
-
-		return recursivelyGetStringPointer(pointerRes.value(), 0);
-	}
-	pointer* getPointerRef()
-	{
-		return mPointer;
-	}
-};;
-

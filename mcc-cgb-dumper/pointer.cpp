@@ -58,20 +58,3 @@ void pointer::updateBaseAddress(void* const& baseAddress)
 }
 
 
-
-std::optional<void*> recursive_string_pointer::recursivelyGetStringPointer(void* address, int recursionLevel)
-{
-	if (recursionLevel > 5) std::nullopt;
-	if (IsBadReadPtr(address, 8)) std::nullopt;
-
-	void* pointer = *(void**)address; // dereference the pointer
-	if (IsBadReadPtr(pointer, 8))
-	{
-		// wasn't a valid pointer, so must be a string.. hopefully
-		return address;
-	}
-	else
-	{
-		recursivelyGetStringPointer((void*)pointer, recursionLevel + 1); // recurse
-	}
-}
