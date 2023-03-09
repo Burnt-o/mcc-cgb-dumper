@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mcc-cgb-dumper", "mcc-cgb-dumper.vcxproj", "{C1ED584A-8C26-40B7-8913-4FDD84E85333}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Injector", "..\..\CERandomiser\Injector\Injector.vcxproj", "{DA6E359C-768A-48DC-9A5D-A97498251040}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Injector", "..\Injector\Injector.vcxproj", "{DA6E359C-768A-48DC-9A5D-A97498251040}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C1ED584A-8C26-40B7-8913-4FDD84E85333} = {C1ED584A-8C26-40B7-8913-4FDD84E85333}
 	EndProjectSection

@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <mutex>
 //#include <memoryapi.h>
 #include <libloaderapi.h>
 #include <cmath>

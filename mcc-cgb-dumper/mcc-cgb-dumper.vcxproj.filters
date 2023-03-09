@@ -27,6 +27,9 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CGBobject_parsed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="global_kill.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGBobject_parsed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
