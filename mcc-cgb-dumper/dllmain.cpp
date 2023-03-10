@@ -76,7 +76,7 @@ void RealMain() {
     //Most of the cool stuff happens in other threads.
     //This loop is just to keep stuff alive.
     while (!global_kill::is_kill_set()) {
-        PLOG_VERBOSE << "how often does this run anyway";
+        PLOG_VERBOSE << "Ready to process new command.";
         if (GetKeyState(0x23) & 0x8000) // 'End' key
         {
             PLOG_INFO << "Killing internal dll";

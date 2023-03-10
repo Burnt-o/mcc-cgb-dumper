@@ -3,6 +3,7 @@
 
 // Windows 
 #define WIN32_LEAN_AND_MEAN   
+#define NOMINMAX // windows.h min and max macros conflict with date.h
 #include <windows.h>  
 
 
@@ -18,9 +19,16 @@
 #include <cassert>
 #include <algorithm>
 #include <fstream>
+#include <chrono>
+#include <iomanip>
+
 
 #include <functional>
 
+#include "nlohmann\json.hpp"
+
+
+#include "date\date.h"
 
 #include <plog/Log.h>
 #include <plog/Init.h>
