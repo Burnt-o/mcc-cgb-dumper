@@ -21,7 +21,7 @@
     <ClCompile Include="dumper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pointer.cpp">
+    <ClCompile Include="multilevel_pointer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
@@ -41,7 +41,7 @@
     <ClInclude Include="command_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pointer.h">
+    <ClInclude Include="multilevel_pointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="global_kill.h">

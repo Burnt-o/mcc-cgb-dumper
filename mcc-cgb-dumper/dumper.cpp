@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "dumper.h"
-#include "pointer.h"
+#include "multilevel_pointer.h"
 #include "utilities.h"
 
 using namespace nlohmann; // for json
@@ -14,23 +14,35 @@ namespace dumper
 
 	namespace // private vars
 	{
-		pointer p_CGBobject_array({0x03F7FF18 , 0x40, 0x0}); // the beginning of the array of CGB objects
+		multilevel_pointer p_CGBobject_array({0x03F7FF18 , 0x40, 0x0}); // the beginning of the array of CGB objects
 		int CGBobject_stride = 0x1B0; // how large a CGB object is (ie the distance between one element in the above array and the next element)
-
+		int VariantStride = 0x128; // how large a Variant (info) element is in the VariantArray (which is itself a member of CGBobject)
+		int MapStride = 0xA8; // How large a map (info) element is in the map array (which is itself a member of Variant Element)
 		// the following pointers will be relative to the current CGBobject that we're iterating on, as set by updateBaseAddress
-		std::vector<pointer*> CGBmembers;
-		pointer p_CGBmember_isValid(nullptr, { 0x10 }); //byte equal to 0x10 if valid, 0x0 if not
-		pointer p_CGBmember_customGameName(nullptr, { 0x20 });
-		pointer p_CGBmember_description(nullptr, { 0x40 });
-		pointer p_CGBmember_serverRegion(nullptr, { 0x80 });
-		pointer p_CGBmember_playersInGame(nullptr, { 0x120 });
-		pointer p_CGBmember_maxPlayers(nullptr, { 0x121 });
-		pointer p_CGBmember_pingMilliseconds(nullptr, { 0x124 });
-		pointer p_CGBmember_variantIndex(nullptr, { 0x170 });
-		pointer p_CGBmember_mapIndex(nullptr, { 0x174 });
-		pointer p_CGBmember_variantArray(nullptr, { 0x158, 0x0 });
-		pointer p_CGBmember_variantCount(nullptr, { 0x198 });
-		pointer p_CGBmember_thisVariantMapsCount(nullptr, { 0x19C });
+		std::vector<multilevel_pointer*> CGBmembers;
+		multilevel_pointer p_CGBmember_isValid(nullptr, { 0x10 }); //byte equal to 0x10 if valid, 0x0 if not
+		multilevel_pointer p_CGBmember_customGameName(nullptr, { 0x20 });
+		multilevel_pointer p_CGBmember_description(nullptr, { 0x40 });
+		multilevel_pointer p_CGBmember_serverRegion(nullptr, { 0x80 });
+		multilevel_pointer p_CGBmember_playersInGame(nullptr, { 0x120 });
+		multilevel_pointer p_CGBmember_maxPlayers(nullptr, { 0x121 });
+		multilevel_pointer p_CGBmember_pingMilliseconds(nullptr, { 0x124 });
+		multilevel_pointer p_CGBmember_variantIndex(nullptr, { 0x170 });
+		multilevel_pointer p_CGBmember_mapIndex(nullptr, { 0x174 });
+		multilevel_pointer p_CGBmember_variantArray(nullptr, { 0x158, 0x0 });
+		multilevel_pointer p_CGBmember_variantCount(nullptr, { 0x1A0 });
+		multilevel_pointer p_CGBmember_thisVariantMapsCount(nullptr, { 0x198 });
+		multilevel_pointer p_CGBmember_gameID(nullptr, { 0x0 });
+		multilevel_pointer p_CGBmember_serverUUID(nullptr, { 0x60 });
+
+		// Relative to variantArray
+		multilevel_pointer p_VariantMember_game(nullptr, { 0x20 });
+		multilevel_pointer p_VariantMember_name(nullptr, { 0x40 });
+		multilevel_pointer p_VariantMember_gameType(nullptr, { 0x60 });
+		multilevel_pointer p_VariantMember_mapArray(nullptr, { 0x110, 0x0 });
+
+		// Relative to MapArray
+		multilevel_pointer p_MapMember_mapName(nullptr, { 0x0 });
 
 
 		bool CGBmemberpointers_initialized = false;
@@ -50,13 +62,15 @@ namespace dumper
 			CGBmembers.push_back(&p_CGBmember_variantArray);
 			CGBmembers.push_back(&p_CGBmember_variantCount);
 			CGBmembers.push_back(&p_CGBmember_thisVariantMapsCount);
+			CGBmembers.push_back(&p_CGBmember_gameID);
+			CGBmembers.push_back(&p_CGBmember_serverUUID);
 
 		}
 
 		void update_CGBmemberpointers(void* p_CGBobject)
 		{
 			// Set all the CGBmember pointers to be relative to the current CGB object
-			for (pointer* member : CGBmembers)
+			for (multilevel_pointer* member : CGBmembers)
 			{
 				member->updateBaseAddress(p_CGBobject);
 			}
@@ -75,10 +89,13 @@ namespace dumper
 
 	// Overload that resolves a pointer object first then does above
 	template <typename T>
-	std::string parseCGBmember(pointer& p, T type)
+	std::string parseCGBmember(multilevel_pointer& p, T type)
 	{
-		std::optional<void*> pMember = p.resolve();
-		return pMember.has_value() ? parseCGBmember(pMember.value(), type) : "NULL";
+		void* pMember; 
+		if (!p.resolve(&pMember)) return "NULL";
+
+
+		return parseCGBmember(pMember, type);
 
 	}
 
@@ -107,12 +124,12 @@ namespace dumper
 	}
 
 	//overload that reoslves pointer object first then does above
-	std::string parseString(pointer& p)
+	std::string parseString(multilevel_pointer& p)
 	{
-		std::optional<void*> pMember = p.resolve();
+		void* pMember;
+		if (!p.resolve(&pMember)) return "ERROR";
 
-		if (!pMember.has_value()) return "NULL";
-		return parseString(pMember.value());
+		return parseString(pMember);
 	}
 
 	void dump()
@@ -131,10 +148,13 @@ namespace dumper
 		g_MCC_baseAddress = mccHandle;
 		PLOG_INFO << "MCC found at address: " << mccHandle;
 
-		void* CGBobject_array = p_CGBobject_array.resolve().has_value() ? p_CGBobject_array.resolve().value() : nullptr;
-		if (!CGBobject_array) { PLOG_ERROR << "CGBobjectarray did not resolve"; return; }
+		void* CGBobject_array;
+		if(!p_CGBobject_array.resolve(&CGBobject_array)) 
+		{ PLOG_ERROR << "CGBobjectarray resolution failed: " << multilevel_pointer::GetLastError(); return;
+		}
 
-		PLOG_VERBOSE << "CGBobject_array" << CGBobject_array;
+		
+		PLOG_VERBOSE << "CGBobject_array: " << CGBobject_array;
 
 		
 		int CGBobjectindex = 0;
@@ -155,85 +175,116 @@ namespace dumper
 			CGBobjectindex++;
 
 
-
-			std::optional<void*> pValidFlag = p_CGBmember_isValid.resolve();
-			if (!pValidFlag.has_value())
-			{ 
-				PLOG_ERROR << "pValidFlag was unreadable"; continue; 
+			uint32_t validFlag; // Equal to 0x10 when the custom game is valid/alive, 0x0 otherwise
+			if (!p_CGBmember_isValid.readData(&validFlag))
+			{
+				PLOG_ERROR << "p_CGBmember_isValid readData failed: " << multilevel_pointer::GetLastError(); return;
 			}
-			uint32_t validFlag = *(uint32_t*)pValidFlag.value();
 
 			if (validFlag != 0x10) 
 			{
-				continueFlag = false;
+				// This is what ends the do-while loop; we iterate through all the valid CustomGames, 
+					// and stop once we reach an invalid one (luckily all the valid ones are grouped together at the start of the array)
+				PLOG_INFO << "Found end of CGBobject struct, total games: " << (CGBobjectindex + 1) << ", validFlag value: " << validFlag;
+				continueFlag = false; 
 				break;
 			}
 
-			std::optional<void*> p_variantIndex =  p_CGBmember_variantIndex.resolve();
-			if (!p_variantIndex.has_value()) 
-			{ 
-				PLOG_ERROR << "p_variantIndex unreadable"; continue; 
-			}
-			PLOG_VERBOSE << "p_variantIndex: " << p_variantIndex.value();
-			int variantIndex = *(int*)p_variantIndex.value();
 
-			if (variantIndex > 0x10 || variantIndex < 0) 
-			{ 
-				PLOG_ERROR << "variantIndex was invalid value: " << variantIndex; continue; 
+			int variantIndex; // Used to know which element of the variants Array we need to acecss
+			if (!p_CGBmember_variantIndex.readData(&variantIndex))
+			{
+				PLOG_ERROR << "p_CGBmember_variantIndex readData failed: " << multilevel_pointer::GetLastError(); continue;
 			}
 
+			if (variantIndex > 0x10 || variantIndex < 0) // can't be more than 6 variants I think, and can't be negative
+			{
+				PLOG_ERROR << "variantIndex was invalid value: " << variantIndex; continue;
+			}
 			PLOG_VERBOSE << "variantIndex: " << variantIndex;
 
-			std::optional<void*> p_mapIndex = p_CGBmember_mapIndex.resolve();
-			if (!p_mapIndex.has_value()) 
-			{ 
-				PLOG_ERROR << "p_mapIndex unreadable"; continue; 
+			int mapIndex; // The index of the currently playing map, out of all the maps in the current variant. 
+			if (!p_CGBmember_mapIndex.readData(&mapIndex))
+			{
+				PLOG_ERROR << "p_CGBmember_mapIndex readData failed: " << multilevel_pointer::GetLastError(); continue;
 			}
-			PLOG_VERBOSE << "p_mapIndex: " << p_mapIndex.value();
-			int mapIndex = *(int*)p_mapIndex.value();
+			if (mapIndex > 0x10 || mapIndex < 0) // I'm actually not sure what the limit on maps in a variant is. But it can't be negative, that's for sure.
+			{
+				PLOG_ERROR << "mapIndex was invalid value: " << mapIndex; continue;
+			}
 			PLOG_VERBOSE << "mapIndex: " << mapIndex;
 
-			if (mapIndex > 0x10 || mapIndex < 0) 
-			{ 
-				PLOG_ERROR << "mapIndex was invalid value: " << mapIndex; continue; 
-			}
 
-			std::optional<void*> p_variantArray = p_CGBmember_variantArray.resolve();
-			if (!p_variantArray.has_value()) 
-			{ 
-				PLOG_ERROR << "p_variantArray unreadable"; continue; 
-			}
-			PLOG_VERBOSE << "p_variantArray: " << p_variantArray.value();
-
-			uintptr_t p_currentVariantInfo = (((uintptr_t)p_variantArray.value()) + (variantIndex * 0x128));
-			if (IsBadReadPtr((void*)p_currentVariantInfo, 8)) 
+			void* p_variantArray; // Where the data for each variant is stored sequentially with a stride of 0x128. We'll use variantIndex to access the element of the currently playing variant
+			if (!p_CGBmember_variantArray.resolve(&p_variantArray))
 			{
-				PLOG_ERROR << "p_currentVariantInfo was invalid" << p_currentVariantInfo << ", index: " << variantIndex; continue;
+				PLOG_ERROR << "p_CGBmember_variantArray resolution failed: " << multilevel_pointer::GetLastError(); continue;
 			}
-			PLOG_VERBOSE << "p_currentVariantInfo: " << p_currentVariantInfo;
+			PLOG_VERBOSE << "p_variantArray: 0x" << p_variantArray;
 
-
-
-			std::string variant_game = parseString((void*)(p_currentVariantInfo + 0x20));
-			std::string variant_name = parseString((void*)(p_currentVariantInfo + 0x40));
-			std::string variant_gameType = parseString((void*)(p_currentVariantInfo + 0x60));
-
-			uintptr_t p_currentVariantMapArray = *(uintptr_t*)(p_currentVariantInfo + 0x110);
-			if (IsBadReadPtr((void*)p_currentVariantMapArray, 8))
+			// Access the element of variantArray that is currently playing variant using variantIndex
+			void* p_variantElement = (void*)((uintptr_t)p_variantArray + (variantIndex * VariantStride));
+			if (IsBadReadPtr(p_variantElement, 8))
 			{
-				PLOG_ERROR << "p_currentVariantMapArray was invalid" << p_currentVariantMapArray; continue;
+				PLOG_ERROR << "p_variantElement is bad read ptr: " << p_variantElement << ", index: " << variantIndex << ", variantArray: " << p_variantArray; continue;
 			}
-			PLOG_VERBOSE << "p_currentVariantMapArray: " << p_currentVariantMapArray;
+			PLOG_VERBOSE << "p_variantElement: 0x" << p_variantElement;
 
-			uintptr_t p_currentVariantMapElement = p_currentVariantMapArray + (0xA8 * mapIndex);
-			if (IsBadReadPtr((void*)p_currentVariantMapElement, 8))
+
+			// Set the p_variantElement as the base address for the pointers that are relative to it
+			p_VariantMember_game.updateBaseAddress(p_variantElement);
+			p_VariantMember_name.updateBaseAddress(p_variantElement);
+			p_VariantMember_gameType.updateBaseAddress(p_variantElement);
+			p_VariantMember_mapArray.updateBaseAddress(p_variantElement);
+		
+			void* p_game;
+			if (!p_VariantMember_game.resolve(&p_game))
 			{
-				PLOG_ERROR << "p_currentVariantMapElement was invalid" << p_currentVariantMapElement; continue;
+				PLOG_ERROR << "p_VariantMember_game resolution failed: " << multilevel_pointer::GetLastError(); continue;
 			}
-			PLOG_VERBOSE << "p_currentVariantMapElement: " << p_currentVariantMapElement;
+			PLOG_VERBOSE << "p_game: 0x" << p_game;
+			std::string variant_game = parseString(p_game);
 
-			std::string variant_currentMap = parseString((void*)(p_currentVariantMapElement));
 
+			void* p_name;
+			if (!p_VariantMember_name.resolve(&p_name))
+			{
+				PLOG_ERROR << "p_VariantMember_name resolution failed: " << multilevel_pointer::GetLastError(); continue;
+			}
+			PLOG_VERBOSE << "p_name: 0x" << p_name;
+			std::string variant_name = parseString(p_name);
+
+			void* p_gameType;
+			if (!p_VariantMember_gameType.resolve(&p_gameType))
+			{
+				PLOG_ERROR << "p_VariantMember_gameType resolution failed: " << multilevel_pointer::GetLastError(); continue;
+			}
+			PLOG_VERBOSE << "p_gameType: 0x" << p_gameType;
+			std::string variant_gameType = parseString(p_gameType);
+
+			
+			void* p_mapArray;
+			if (!p_VariantMember_mapArray.resolve(&p_mapArray))
+			{
+				PLOG_ERROR << "p_VariantMember_mapArray resolution failed: " << multilevel_pointer::GetLastError(); continue;
+			}
+
+			// Access the element of MapArray that is currently playing map using mapIndex
+			void* p_mapElement = (void*)((uintptr_t)p_mapArray + (mapIndex * MapStride));
+			if (IsBadReadPtr(p_mapElement, 8))
+			{
+				PLOG_ERROR << "p_mapElement is bad read ptr: " << p_mapElement << ", index: " << mapIndex << ", mapArray: " << p_mapArray; continue;
+			}
+			
+			// Set pMapArray as the base address for the map string
+			p_MapMember_mapName.updateBaseAddress(p_mapElement);
+			
+			void* p_mapString;
+			if (!p_MapMember_mapName.resolve(&p_mapString))
+			{
+				PLOG_ERROR << "p_MapMember_mapName resolution failed: " << multilevel_pointer::GetLastError(); continue;
+			}
+			std::string currentMap = parseString(p_mapString);
 
 
 			json thisCG;
@@ -242,12 +293,14 @@ namespace dumper
 			thisCG.push_back(std::pair("CustomGameName", parseString(p_CGBmember_customGameName)));
 			thisCG.push_back(std::pair("ServerRegion", parseString(p_CGBmember_serverRegion)));
 			thisCG.push_back(std::pair("ServerDescription", parseString(p_CGBmember_description)));
+			thisCG.push_back(std::pair("GameID", parseString(p_CGBmember_gameID)));
+			thisCG.push_back(std::pair("ServerUUID", parseString(p_CGBmember_serverUUID)));
 			thisCG.push_back(std::pair("PlayersInGame", parseCGBmember(p_CGBmember_playersInGame, (char)NULL)));
 			thisCG.push_back(std::pair("MaxPlayers", parseCGBmember(p_CGBmember_maxPlayers, (char)NULL)));
 			thisCG.push_back(std::pair("VariantGame", variant_game));
 			thisCG.push_back(std::pair("VariantName", variant_name));
 			thisCG.push_back(std::pair("VariantGameType", variant_gameType));
-			thisCG.push_back(std::pair("CurrentMap", variant_currentMap));
+			thisCG.push_back(std::pair("CurrentMap", currentMap));
 			thisCG.push_back(std::pair("MapCount", parseCGBmember(p_CGBmember_thisVariantMapsCount, (char)NULL)));
 			thisCG.push_back(std::pair("VariantCount", parseCGBmember(p_CGBmember_variantCount, (char)NULL)));
 			thisCG.push_back(std::pair("PingMilliseconds", parseCGBmember(p_CGBmember_pingMilliseconds, (uint32_t)NULL)));

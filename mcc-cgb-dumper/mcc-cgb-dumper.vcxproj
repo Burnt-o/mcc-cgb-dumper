@@ -150,7 +150,7 @@
     <ClCompile Include="command_handler.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="dumper.cpp" />
-    <ClCompile Include="pointer.cpp" />
+    <ClCompile Include="multilevel_pointer.cpp" />
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,7 +158,7 @@
     <ClInclude Include="dumper.h" />
     <ClInclude Include="global_kill.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="pointer.h" />
+    <ClInclude Include="multilevel_pointer.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
