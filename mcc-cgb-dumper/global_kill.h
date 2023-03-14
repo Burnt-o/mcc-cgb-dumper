@@ -19,6 +19,7 @@ public:
 	static void kill_me()
 	{
 		global_kill::get().mKillFlag = true;
+		
 	}
 	static bool is_kill_set()
 	{

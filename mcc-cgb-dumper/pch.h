@@ -4,7 +4,7 @@
 // Windows 
 #define WIN32_LEAN_AND_MEAN   
 #define NOMINMAX // windows.h min and max macros conflict with date.h
-#include <windows.h>  
+#include <Windows.h>  
 
 
 #include <iostream>
@@ -13,7 +13,7 @@
 #include <optional>
 #include <string>
 #include <mutex>
-//#include <memoryapi.h>
+
 #include <libloaderapi.h>
 #include <cmath>
 #include <cassert>
@@ -25,10 +25,10 @@
 
 #include <functional>
 
-#include "nlohmann\json.hpp"
 
+#include <nlohmann/json.hpp>
 
-#include "date\date.h"
+#include <date/date.h>
 
 #include <plog/Log.h>
 #include <plog/Init.h>

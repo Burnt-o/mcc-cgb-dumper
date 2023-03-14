@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "multilevel_pointer.h"
 
+void* multilevel_pointer::mEXEAddress = nullptr;
 
-void* g_MCC_baseAddress = nullptr;
 
 bool multilevel_pointer::dereference_pointer(void* base, std::vector<int64_t> offsets, void** resolvedOut)
 {
@@ -53,43 +53,123 @@ bool multilevel_pointer::dereference_pointer(void* base, std::vector<int64_t> of
 
 bool multilevel_pointer::resolve(void** resolvedOut)
 {
+	if (!mEXEAddress)
+	{
+		mEXEAddress = GetModuleHandleA(NULL);// null means get the handle for the currently running module
+		if (!mEXEAddress) { PLOG_ERROR << "Couldn't get exe process handle"; throw("Couldn't get exe process handle"); }
+	}
+
 	switch (this->mPointerType)
 	{
 
 	case pointer_type::EXE_OFFSET:
-		return dereference_pointer(g_MCC_baseAddress, this->mOffsets, resolvedOut);
+		return dereference_pointer(mEXEAddress, this->mOffsets, resolvedOut);
 		break;
 
 	case pointer_type::BASE_OFFSET:
 		return dereference_pointer(this->mBaseAddress, this->mOffsets, resolvedOut);
 		break;
+
+	default:
+		return false;
 	}
 }
-
-
-//template<typename T>
-//static bool multilevel_pointer::readData(T* resolvedOut)
-//{
-//	void* address; 
-//	if (!this->resolve(&address)) return false;
-//
-//	//*resolvedOut = *(T*)address;
-//	T* dataPointer = dynamic_cast<T*>(address);
-//	if (dataPointer == NULL)
-//	{
-//		*SetLastErrorByRef() << "Pointer was good but failed casting from void* to " << T << "*";
-//			return false;
-//	}
-//
-//	*resolvedOut = *dataPointer;
-//		return true;
-//}
-
 
 
 void multilevel_pointer::updateBaseAddress(void* const& baseAddress)
 {
 	if (this->mPointerType != pointer_type::BASE_OFFSET) throw;
 	this->mBaseAddress = baseAddress;
+}
+
+
+
+// overload for string case
+
+bool multilevel_pointer::readString(std::string& resolvedOut)
+{
+
+
+	void* pString;
+	if (!this->resolve(&pString)) return false;
+
+	PLOG_VERBOSE << "readString parsing @" << pString;
+
+	uint64_t strLength = *(uint64_t*)(((uintptr_t)pString) + 0x10); // int value of string length is stored at +0x10 from string start
+	uint64_t strCapacity = *(uint64_t*)(((uintptr_t)pString) + 0x18); // int value of string length is stored at +0x10 from string start
+
+	PLOG_VERBOSE << "readString parsing strLength @" << std::hex << (((uintptr_t)pString) + 0x10);
+	PLOG_VERBOSE << "readString parsing strCapacity @" << std::hex << (((uintptr_t)pString) + 0x18);
+
+	// Validity checks
+	if (strLength == 0) // empty string or invalid pointer
+	{
+		*SetLastErrorByRef() << "readString failed, strLength was zero : " << std::hex << strLength << std::endl;
+		return false;
+	}
+
+	if (strCapacity < 0x0F) // Capacity will always be atleast 0x0F (size of short-string buffer)
+	{
+		*SetLastErrorByRef() << "readString failed, strCapacity was less than 0x10 : " << std::hex << strCapacity << std::endl;
+		return false;
+	}
+
+	if (strLength > strCapacity) // Capacity will always bigger or equal to Length
+	{
+		*SetLastErrorByRef() << "readString failed, strCapacity was less than strLength : " << std::hex << strLength << " : " << strCapacity << std::endl;
+		return false;
+	}
+
+	strLength += 1; // Add one to our strLength so we can get the null termination character too
+
+	auto potentialChars = std::make_unique<char[]>(strLength); // + 1 so we get the null termination character too
+
+	// Handle shortstring vs longstring
+	if (strLength <= 0x10) 
+	{
+		PLOG_VERBOSE << "short string case";
+		//short string case - the string is stored in the buffer
+		std::memcpy(potentialChars.get(), pString, strLength); // our void* is actually the char*, so we can copy that
+
+	}
+	else
+	{
+		PLOG_VERBOSE << "long string case";
+		//long string case. follow the pointer in the buffer to the real char* (ie we're dealing with a char**)
+		std::memcpy(potentialChars.get(), *(void**)pString, strLength);
+	}
+
+	// Confirm that our string is valid
+	// The string should contain a null termination char at the END, and ONLY at the end
+	for (int i = 0; i < strLength; i++)
+	{
+		// if not the last char in the string
+		if (i != strLength - 1)
+		{
+			// failure if it's a null char
+			if (potentialChars.get()[i] == '\0')
+			{
+				*SetLastErrorByRef() << "readString failed, null termination character found before end of string" << std::endl;
+				return false;
+			}
+		}
+		else // we're at end of string
+		{
+			// failure if it's NOT a null char
+			if (potentialChars.get()[i] != '\0')
+			{
+				*SetLastErrorByRef() << "readString failed, null termination character not found at end of string" << std::endl;
+				return false;
+			}
+		}
+	}
+
+	// copy chars to a string
+	resolvedOut = std::string(potentialChars.get());
+
+	return true;
+
+
+
 }
 

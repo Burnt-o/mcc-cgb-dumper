@@ -36,7 +36,7 @@ namespace command_handler
     void help(const std::vector<CommandBase*>& commandList) {
         std::cout << "---------------Operating Instructions---------------" << std::endl;
         for (unsigned i = 0; i < commandList.size(); ++i) {
-            std::cout << commandList[i]->help << std::endl;
+            std::cout << commandList[i]->GetHelp() << std::endl;
         }
         std::cout << "---------------------------------------------------" << std::endl << std::endl;
     }
@@ -67,16 +67,13 @@ namespace command_handler
 
             //Remove any preceeding whitespace.
             auto pos = ourParameters.find_first_not_of(' ');
-            ourParameters = ourParameters.substr(pos != std::string::npos ? pos : 0);
-            //ourParameters.erase(ourParameters.begin(), std::find_if(ourParameters.begin(), ourParameters.end(), std::bind1st(std::not_equal_to<char>(), ' '))); // bind1st is deprecated
-
-            PLOG_VERBOSE << "We will execute the command: " << ourCommand;
-            PLOG_VERBOSE << "We will use the parameters: " << ourParameters;
+            ourParameters = ourParameters.substr(pos != std::string::npos ? pos : 0); // Had to adjust this line as bind1st was deprecated
+          
 
 
             bool foundCommand = false;
             for (unsigned i = 0; i < g_commandList.size(); ++i) {
-                if (g_commandList[i]->name == ourCommand) {
+                if (g_commandList[i]->GetName() == ourCommand) {
                     foundCommand = true;
                     g_commandList[i]->execute(ourParameters);
                     break;
