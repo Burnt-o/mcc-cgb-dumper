@@ -50,6 +50,35 @@ void CustomGameRefresher::tryGuessRefreshClickPosition()
 }
 
 
+
+
+LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+	PLOG_VERBOSE << "AH";
+
+	switch (message)
+	{
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+		break;
+	}
+
+	return 0;
+}
+
+
+LRESULT CALLBACK Wndproc(
+	HWND unnamedParam1,
+	UINT unnamedParam2,
+	WPARAM unnamedParam3,
+	LPARAM unnamedParam4
+)
+{
+	PLOG_VERBOSE << "KILL ME";
+}
+
 void CustomGameRefresher::forceRefresh() const
 {
 	if (!mRefreshPositionInitialized)
@@ -74,6 +103,20 @@ void CustomGameRefresher::forceRefresh() const
 
 	LPARAM clickPosition = MAKELPARAM(this->mRefreshX, this->mRefreshY);
 
+	// Trying CallWindowProc
+
+	WNDPROC orgWndProc = (WNDPROC)GetWindowLongPtrW(handle, GWLP_WNDPROC);
+
+
+	CallWindowProcW(orgWndProc, handle, WM_MOUSEMOVE, (WPARAM)0, clickPosition);
+	CallWindowProcW(orgWndProc, handle, WM_LBUTTONDOWN, (WPARAM)1, clickPosition);
+	CallWindowProcW(orgWndProc, handle, WM_LBUTTONUP, (WPARAM)0, clickPosition);
+
+	//CallWindowProcW(*p_LastWndProc, handle, WM_LBUTTONUP, 0, clickPosition);
+
+
+
+
 	// Send the fake click message at where we think the refresh button is
 	//PostMessageA(handle, WM_MOUSEMOVE, (WPARAM)0, clickPosition);
 	//PostMessageA(handle, WM_LBUTTONDOWN, (WPARAM)0, clickPosition);
@@ -91,11 +134,15 @@ void CustomGameRefresher::forceRefresh() const
 	//PostMessageA(handle, WM_ACTIVATE, (WPARAM)WA_CLICKACTIVE, MAKELPARAM(TRUE, NULL));
 	//PostMessageA(handle, WM_SETFOCUS, (WPARAM)NULL, (LPARAM)NULL);
 
-	PostMessageA(handle, WM_MOUSEMOVE, (WPARAM)1, clickPosition);
-	PostMessageA(handle, WM_LBUTTONDOWN, (WPARAM)1, clickPosition);
-	PostMessageA(handle, WM_MOUSEMOVE, (WPARAM)1, clickPosition);
-	PostMessageA(handle, WM_LBUTTONUP, (WPARAM)0, clickPosition);
 
+	//LONG_PTR OldWndProc = SetWindowLongPtrW(handle, GWLP_WNDPROC, (LONG_PTR)&NewWndProc);
+
+	//PostMessageW(handle, WM_MOUSEMOVE, (WPARAM)0, clickPosition);
+	//PostMessageW(handle, WM_LBUTTONDOWN, (WPARAM)1, clickPosition);
+	//PostMessageW(handle, WM_MOUSEMOVE, (WPARAM)1, clickPosition);
+	//PostMessageW(handle, WM_LBUTTONUP, (WPARAM)0, clickPosition);
+
+	//SetWindowLongPtrW(handle, GWLP_WNDPROC, (long)OldWndProc);
 
 	PLOG_VERBOSE << "Click sent at " << this->mRefreshX << ", " << this->mRefreshY;
 
