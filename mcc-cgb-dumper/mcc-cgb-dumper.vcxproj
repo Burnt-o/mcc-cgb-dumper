@@ -151,6 +151,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="dumper.cpp" />
     <ClCompile Include="multilevel_pointer.cpp" />
+    <ClCompile Include="CustomGameRefresher.cpp" />
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,8 +159,16 @@
     <ClInclude Include="command_handler.h" />
     <ClInclude Include="dumper.h" />
     <ClInclude Include="global_kill.h" />
+    <ClInclude Include="include\plog\Init.h" />
+    <ClInclude Include="include\plog\Log.h" />
+    <ClInclude Include="include\plog\Logger.h" />
+    <ClInclude Include="include\plog\Record.h" />
+    <ClInclude Include="include\plog\Severity.h" />
+    <ClInclude Include="include\plog\Util.h" />
+    <ClInclude Include="include\plog\WinApi.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="multilevel_pointer.h" />
+    <ClInclude Include="CustomGameRefresher.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

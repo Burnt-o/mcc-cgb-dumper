@@ -2,8 +2,9 @@
 #include "pch.h"
 #include "command_handler.h"
 #include "dumper.h"
+#include "CustomGameRefresher.h"
 
-class CommandForceDump : public command_handler::CommandBase {
+class CommandForceDump : public CommandBase {
 public:
 	CommandForceDump() {
 		SetName("forcedump");
@@ -17,43 +18,10 @@ public:
 	}
 };
 
-class CommandAutoDumpEnable : public command_handler::CommandBase {
-public:
-	CommandAutoDumpEnable() {
-		SetName("autodump_enable");
-		SetHelp("autodump_enable <interval time in seconds> ~ Automatically dump CGB data every x seconds. ");
-	}
-
-	void execute(const std::string& line) final
-	{
-		try
-		{
-			dumper::AutoDumper::Enable(std::stoi(line));
-			std::cout << "autodump enabled, " << line << " second interval" << std::endl;
-		}
-		catch (std::invalid_argument e)
-		{
-			std::cout << "Error converting interval to int. Whole numbers only : " << e.what() << std::endl;
-		}
-	}
-};
-
-class CommandAutoDumpDisable : public command_handler::CommandBase {
-public:
-	CommandAutoDumpDisable() {
-		SetName("autodump_disable");
-		SetHelp("autodump_disable ~ Disables automatic dumping. ");
-	}
-
-	void execute(const std::string& line) final
-	{
-		dumper::AutoDumper::Disable();
-		std::cout << "autodump disabled" << std::endl;
-	}
-};
 
 
-class CommandExit : public command_handler::CommandBase {
+
+class CommandExit : public CommandBase {
 
 public:
 	CommandExit() {
@@ -68,51 +36,135 @@ public:
 	}
 };
 
-class CommandLoggingLevel : public command_handler::CommandBase {
-private:
-	enum StringValue {
-		evNotDefined,
-		evVerbose,
-		evDebug,
-		evInfo,
-		evError,
-		evEnd
-	};
-	std::map<std::string, StringValue> stringmap = { {"verbose", evVerbose }, {"debug", evDebug}, { "info", evInfo}, {"error", evError}};
+
+class CommandLoggingLevel : public CommandBase {
 
 public:
 	CommandLoggingLevel() {
-		SetName("logging_level");
-		SetHelp("logging_level <verbose, debug, info, error> ~ Set the verbosity level of logging. ");
+		SetName("logging");
+		SetHelp("logging <verbose, debug, info, error> ~ Set the verbosity level of logging. ");
 	}
 
 	void execute(const std::string& line) final
 	{
 
-		switch (stringmap[line])
+		plog::Severity severity = plog::severityFromString(line.c_str());
+
+		if (severity == plog::Severity::none)
 		{
-		case evVerbose:
-			plog::get()->setMaxSeverity(plog::verbose);
-			break;
-
-		case evDebug:
-			plog::get()->setMaxSeverity(plog::debug);
-			break;
-
-		case evInfo:
-			plog::get()->setMaxSeverity(plog::info);
-			break;
-
-		case evError:
-			plog::get()->setMaxSeverity(plog::error);
-			break;
-
-		default:
-			std::cout << "Error processing logging_level parameter: " << line << std::endl;
-			return;
+			std::cout << "logging error: could not parse parameter: " << line << std::endl;
+		}
+		else
+		{
+			plog::get()->setMaxSeverity(severity);
+			std::cout << "Log level set to " << plog::severityToString(severity) << std::endl;
 		}
 
-		std::cout << "Log level set to " << line << std::endl;
 	}
 };
 
+
+
+class CommandForceRefresh : public CommandBase {
+private:
+	std::shared_ptr<CustomGameRefresher> customGameRefresherInstance;
+
+public:
+	explicit CommandForceRefresh(std::shared_ptr<CustomGameRefresher> instance) : customGameRefresherInstance(instance) {
+		SetName("force_refresh");
+		SetHelp("force_refresh ~ Force a CGB refresh by simulating a click where the button should be. ");
+	}
+
+	void execute(const std::string& line) final
+	{
+		std::cout << "Simulating refresh button mouse click." << std::endl;
+		customGameRefresherInstance.get()->forceRefresh();
+	}
+};
+
+
+class CommandSetRefreshClickPosition : public CommandBase {
+
+private:
+	std::shared_ptr<CustomGameRefresher> customGameRefresherInstance;
+
+public:
+	explicit CommandSetRefreshClickPosition(std::shared_ptr<CustomGameRefresher> instance) : customGameRefresherInstance(instance) {
+		SetName("set_refresh_pos");
+		SetHelp("set_refresh_pos <int x> <int y> ~ Set the screen position (relative to MCC window) of the center of the CGB refresh button. ");
+	}
+
+	void execute(const std::string& line) final
+	{
+		std::vector<std::string> values;
+		splitString(line, " ", &values);
+		if (values.size() < 2)
+		{
+			std::cout << "set_refresh_pos error: not enough parameters (need 2)";
+			return;
+		}
+		else if (values.size() > 2)
+		{
+			std::cout << "set_refresh_pos error: too many parameters (only 2)";
+			return;
+		}
+
+
+		int x = 0;
+		int y = 0;
+		try
+		{
+			x = std::stoi(values.at(0));
+			y = std::stoi(values.at(1));
+		}
+		catch (std::invalid_argument e)
+		{
+			std::cout << "set_refresh_pos error: could not convert input to int. Whole numbers only : " << e.what() << std::endl;
+			return;
+		}
+
+		customGameRefresherInstance.get()->setRefreshClickPosition(x, y);
+		std::cout << "Set refresh click position to " << x << ", " << y << std::endl;
+	}
+};
+
+class CommandAutoRefreshEnable : public CommandBase {
+private:
+	std::shared_ptr<CustomGameRefresher> customGameRefresherInstance;
+
+public:
+	explicit CommandAutoRefreshEnable(std::shared_ptr<CustomGameRefresher> instance) : customGameRefresherInstance(instance) {
+		SetName("autorefresh_enable");
+		SetHelp("autorefresh_enable <interval time in seconds> ~ Automatically refresh the CGB window every x seconds. ");
+	}
+
+	void execute(const std::string& line) final
+	{
+		try
+		{
+			customGameRefresherInstance.get()->enableAutoRefresh(std::stoi(line));
+			std::cout << "autodump enabled, " << line << " second interval" << std::endl;
+		}
+		catch (std::invalid_argument e)
+		{
+			std::cout << "autodump_enable error: could not convert parameter to int. Whole numbers only : " << e.what() << std::endl;
+		}
+	}
+};
+
+class CommandAutoRefreshDisable : public CommandBase {
+private:
+	std::shared_ptr<CustomGameRefresher> customGameRefresherInstance;
+
+public:
+	explicit CommandAutoRefreshDisable(std::shared_ptr<CustomGameRefresher> instance) : customGameRefresherInstance(instance) {
+		SetName("autorefresh_disable");
+		SetHelp("autorefresh_disable ~ Disables automatic refreshing. ");
+	}
+
+	void execute(const std::string& line) final
+	{
+		customGameRefresherInstance.get()->disableAutoRefresh();
+		std::cout << "autorefresh disabled" << std::endl;
+	}
+};

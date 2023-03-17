@@ -33,6 +33,9 @@
     <ClCompile Include="utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CustomGameRefresher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -54,6 +57,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Init.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Log.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Logger.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Record.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Severity.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Util.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\WinApi.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomGameRefresher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

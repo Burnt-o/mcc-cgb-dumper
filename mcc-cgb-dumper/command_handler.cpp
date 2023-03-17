@@ -1,14 +1,11 @@
 #include "pch.h"
 #include "command_handler.h"
-namespace command_handler
-{
 
 
 
 
 
-
-    int split(const std::string& line, const std::string& seperator, std::vector<std::string>* values) {
+    int CommandBase::splitString(const std::string& line, const std::string& seperator, std::vector<std::string>* values) const {
         std::string tString = "";
         unsigned counter = 0;
         for (unsigned l = 0; l < line.size(); ++l) {
@@ -33,10 +30,11 @@ namespace command_handler
 
    
 
-    void help(const std::vector<CommandBase*>& commandList) {
+    void CommandHandler::help() const {
         std::cout << "---------------Operating Instructions---------------" << std::endl;
-        for (unsigned i = 0; i < commandList.size(); ++i) {
-            std::cout << commandList[i]->GetHelp() << std::endl;
+        for (auto& command : mCommandList)
+        {
+            std::cout << command->GetHelp() << std::endl;
         }
         std::cout << "---------------------------------------------------" << std::endl << std::endl;
     }
@@ -44,47 +42,43 @@ namespace command_handler
 
 
 
-    std::vector<CommandBase*> g_commandList;
-    void init_commands(const std::vector<CommandBase*>& commandList)
-    {
+    void CommandHandler::handleCommands() const {
 
-        g_commandList = commandList;
-        help(g_commandList);
-    }
+        if (mCommandList.empty()) return;
 
-    void handle_commands() {
-
-        if (g_commandList.empty()) return;
-
-        std::string ourCommand;
-        std::string ourParameters;
-
-        
+        std::string userCommand;
+        std::string userParameters;
 
 
-            std::cin >> ourCommand;
-            std::getline(std::cin, ourParameters);
+            std::cin >> userCommand;
+            std::getline(std::cin, userParameters);
 
             //Remove any preceeding whitespace.
-            auto pos = ourParameters.find_first_not_of(' ');
-            ourParameters = ourParameters.substr(pos != std::string::npos ? pos : 0); // Had to adjust this line as bind1st was deprecated
+            auto pos = userParameters.find_first_not_of(' ');
+            userParameters = userParameters.substr(pos != std::string::npos ? pos : 0); // Had to adjust this line as bind1st was deprecated
           
 
-
             bool foundCommand = false;
-            for (unsigned i = 0; i < g_commandList.size(); ++i) {
-                if (g_commandList[i]->GetName() == ourCommand) {
+            // Loop through our commandlist and check if we have a match
+            for (auto& command : mCommandList)
+            {
+                if (command->GetName() == userCommand)
+                {
+                    // A match! Execute the command
                     foundCommand = true;
-                    g_commandList[i]->execute(ourParameters);
+                    command->execute(userParameters);
                     break;
                 }
                 else continue;
             }
+
+            // No command at all was found, user must have made a mistake
             if (!foundCommand) {
-                PLOG_ERROR << "The command: " << ourCommand << " was not reconized. Please try again.";
-                help(g_commandList);
+                PLOG_ERROR << "The command: " << userCommand << " was not reconized. Please try again.";
+                help();
             }
+
+
         
     }
 
-}

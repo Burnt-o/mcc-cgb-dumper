@@ -45,28 +45,36 @@ void stop_logging()
 
 // Main Execution Loop
 void RealMain() {
-	init_logging();
-	PLOG_INFO << "mcc-cgb-dumper initializing";
 
-	std::vector<command_handler::CommandBase*> commandList;
-	commandList.emplace_back(new CommandForceDump());
-	commandList.emplace_back(new CommandExit());
-	commandList.emplace_back(new CommandLoggingLevel());
-	commandList.emplace_back(new CommandAutoDumpEnable());
-	commandList.emplace_back(new CommandAutoDumpDisable());
+	{ // Enclosing scope for used resources
+		init_logging();
+		PLOG_INFO << "mcc-cgb-dumper initializing";
 
-	command_handler::init_commands(commandList);
 
-	// Run/wait for commands, until global kill is set by "exit" command
-	while (!global_kill::is_kill_set()) {
-		PLOG_VERBOSE << "Ready to process new command.";
-		command_handler::handle_commands();
+
+		auto customGameRefresher = std::make_shared<CustomGameRefresher>();
+
+		std::vector<std::unique_ptr<CommandBase>> commandList;
+		commandList.emplace_back(std::make_unique<CommandExit>());
+		commandList.emplace_back(std::make_unique<CommandLoggingLevel>());
+		commandList.emplace_back(std::make_unique<CommandForceRefresh>(customGameRefresher));
+		commandList.emplace_back(std::make_unique<CommandAutoRefreshEnable>(customGameRefresher));
+		commandList.emplace_back(std::make_unique<CommandAutoRefreshDisable>(customGameRefresher));
+		commandList.emplace_back(std::make_unique<CommandSetRefreshClickPosition>(customGameRefresher));
+
+		CommandHandler commandHandler(commandList);
+		commandHandler.help(); // Print list of commands
+
+		std::cout << "Logging level set to: " << plog::severityToString(plog::get()->getMaxSeverity()) << std::endl;
+
+		// Run/wait for commands, until global kill is set by "exit" command
+		while (!global_kill::is_kill_set()) {
+			PLOG_VERBOSE << "Ready to process new command.";
+			commandHandler.handleCommands();
+		}
 	}
-
-	// wait for autodumper to gracefully end
-	dumper::AutoDumper::GetThreadRef().join();
-
-	// shutdown
+	// Any used resources should be out of scope now, ie unique_ptrs and shared_ptrs should be dead
+	// So we just need to cleanup anything that we have to do manually
 	stop_logging();
 }
 

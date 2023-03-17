@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <atomic>
 
+#include <WinUser.h>
 
 using namespace nlohmann; // for json
 
@@ -150,9 +151,57 @@ namespace dumper
 	}
 
 
+
+	typedef LRESULT(*SendMessageA)(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+	SendMessageA Original_SendMessageA;
+
+
+	
+	const float RefreshXfraction = (440.f / 1220.f);
+	const float RefreshYfraction = (690.f / 772.f);
+
+	void ForceCustomGameBrowserRefresh()
+	{
+		// Get the handle to the MCC window
+		HWND handle = FindWindowA(NULL, "Halo: The Master Chief Collection  "); // Two spaces at the end of the string, for some reason
+		PLOG_VERBOSE << "MCC Window Handle: " << handle;
+		
+
+		if (handle == NULL)
+		{
+			PLOG_ERROR << "Failed to force a refresh, couldn't get handle to MCC window";
+			return;
+		}
+
+		// Get the dimensions of the MCC window - we can use these to calculate where the refresh button is located
+		RECT windowDimensions;
+		GetWindowRect(handle, &windowDimensions);
+
+		float windowWidth = windowDimensions.right - windowDimensions.left;
+		float windowHeight = windowDimensions.bottom - windowDimensions.top;
+
+		PLOG_VERBOSE << "windowDimensions: " << std::endl
+			<< "width: " << windowWidth << std::endl
+			<< "height: " << windowHeight << std::endl;
+
+		WORD refreshX = static_cast<WORD>(windowWidth * RefreshXfraction);
+		WORD refreshY = static_cast<WORD>(windowHeight * RefreshYfraction);
+		PLOG_VERBOSE << "clickPosition: " << refreshX << ", " << refreshY;
+		LPARAM clickPosition = MAKELPARAM(refreshX, refreshY);
+		
+		// Send the fake click message at where we think the refresh button is
+		PostMessageA(handle, WM_MOUSEMOVE, (WPARAM)0, clickPosition);
+		PostMessageA(handle, WM_LBUTTONDOWN, (WPARAM)0, clickPosition);
+		PostMessageA(handle, WM_LBUTTONUP, (WPARAM)0, clickPosition);
+
+
+
+	}
+
+
 	void dump()
 	{
-
+		ForceCustomGameBrowserRefresh();
 		static Pointers pointers;
 
 		PLOG_VERBOSE << "Beginning dump";
