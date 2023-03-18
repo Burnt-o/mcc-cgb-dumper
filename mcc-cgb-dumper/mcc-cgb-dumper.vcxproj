@@ -151,7 +151,6 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="dumper.cpp" />
     <ClCompile Include="multilevel_pointer.cpp" />
-    <ClCompile Include="CustomGameRefresher.cpp" />
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -50,9 +50,23 @@ void RealMain() {
 		init_logging();
 		PLOG_INFO << "mcc-cgb-dumper initializing";
 
+		std::shared_ptr<CustomGameRefresher> customGameRefresher;
+		try
+		{
+			customGameRefresher = std::make_shared<CustomGameRefresher>();
+		}
+		catch(std::runtime_error& ex)
+		{
+			PLOG_ERROR << "customGameRefresher failed to initialize, error: ";
+			PLOG_ERROR << ex.what();
 
-
-		auto customGameRefresher = std::make_shared<CustomGameRefresher>();
+			PLOG_ERROR << "Enter any command to exit";
+			std::string dontCare;
+			std::cin>>dontCare;
+			stop_logging();
+			return;
+		}
+		
 
 		std::vector<std::unique_ptr<CommandBase>> commandList;
 		commandList.emplace_back(std::make_unique<CommandExit>());
@@ -60,7 +74,7 @@ void RealMain() {
 		commandList.emplace_back(std::make_unique<CommandForceRefresh>(customGameRefresher));
 		commandList.emplace_back(std::make_unique<CommandAutoRefreshEnable>(customGameRefresher));
 		commandList.emplace_back(std::make_unique<CommandAutoRefreshDisable>(customGameRefresher));
-		commandList.emplace_back(std::make_unique<CommandSetRefreshClickPosition>(customGameRefresher));
+		
 
 		CommandHandler commandHandler(commandList);
 		commandHandler.help(); // Print list of commands

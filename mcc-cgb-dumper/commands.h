@@ -19,8 +19,6 @@ public:
 };
 
 
-
-
 class CommandExit : public CommandBase {
 
 public:
@@ -83,50 +81,6 @@ public:
 };
 
 
-class CommandSetRefreshClickPosition : public CommandBase {
-
-private:
-	std::shared_ptr<CustomGameRefresher> customGameRefresherInstance;
-
-public:
-	explicit CommandSetRefreshClickPosition(std::shared_ptr<CustomGameRefresher> instance) : customGameRefresherInstance(instance) {
-		SetName("set_refresh_pos");
-		SetHelp("set_refresh_pos <int x> <int y> ~ Set the screen position (relative to MCC window) of the center of the CGB refresh button. ");
-	}
-
-	void execute(const std::string& line) final
-	{
-		std::vector<std::string> values;
-		splitString(line, " ", &values);
-		if (values.size() < 2)
-		{
-			std::cout << "set_refresh_pos error: not enough parameters (need 2)";
-			return;
-		}
-		else if (values.size() > 2)
-		{
-			std::cout << "set_refresh_pos error: too many parameters (only 2)";
-			return;
-		}
-
-
-		int x = 0;
-		int y = 0;
-		try
-		{
-			x = std::stoi(values.at(0));
-			y = std::stoi(values.at(1));
-		}
-		catch (std::invalid_argument e)
-		{
-			std::cout << "set_refresh_pos error: could not convert input to int. Whole numbers only : " << e.what() << std::endl;
-			return;
-		}
-
-		customGameRefresherInstance.get()->setRefreshClickPosition(x, y);
-		std::cout << "Set refresh click position to " << x << ", " << y << std::endl;
-	}
-};
 
 class CommandAutoRefreshEnable : public CommandBase {
 private:

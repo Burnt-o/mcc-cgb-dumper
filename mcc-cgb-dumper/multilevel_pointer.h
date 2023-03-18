@@ -23,7 +23,7 @@ private:
 	pointer_type mPointerType;
 
 
-	bool dereference_pointer(void* base, std::vector<int64_t> offsets, void** resolvedOut);
+	bool dereference_pointer(void* base, std::vector<int64_t> offsets, void** resolvedOut) const;
 
 public:
 
@@ -40,13 +40,13 @@ public:
 
 	void updateBaseAddress(void* const& baseAddress);
 
-	bool resolve(void** resolvedOut);
+	bool resolve(void** resolvedOut) const;
 
 
-	bool readString(std::string& resolvedOut);
+	bool readString(std::string& resolvedOut) const;
 
 	template<typename T>
-	bool readData(T* resolvedOut)
+	bool readData(T* resolvedOut) const
 	{
 		if (typeid(T) == typeid(std::string))
 		{
@@ -63,7 +63,7 @@ public:
 
 
 
-	static std::string GetLastError()
+	static std::string GetLastError() 
 	{
 		return mLastError.str();
 	}
