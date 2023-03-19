@@ -1,13 +1,12 @@
 #pragma once
 #include "multilevel_pointer.h"
 
-// Defines a CustomGameRefresh class that can simulate a click in the MCC process
-// at the position where the Custom Game Browser's refresh button should be.
-// Includes a function to set the position of the refresh button,
-// and a way to automatically click refresh every however-many seconds.
+// Defines a CustomGameRefresh class that can force the CustomGameBrowser to refresh
+// using a call to the MCC function that performs it.
+// Includes a way to automatically force a refresh every however-many seconds.
 
-// Define the games CallRefreshFunction
-typedef uint64_t(*CallRefreshFunction)(uint64_t unknownPointer);
+// Define the func signature of the games CallRefreshFunction that we will want to call
+typedef uint64_t(*MCC_CallRefreshFunction)(uint64_t unknownPointer);
 
 
 class CustomGameRefresher
@@ -37,8 +36,9 @@ private:
 
 
 	const multilevel_pointer mlp_OrigCallRefreshFunction{ { 0xA92EA8 } }; // Pointer to OrigCallRefresh
-	const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x03B227C8, 0x90, 0xB0 } }; // Parameter that needs to be passed to OrigCallRefresh
-	CallRefreshFunction mOrigCallRefreshFunction; // We'll resolve this in constructor
+	//const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x03B227C8, 0x90, 0xB0 } }; // Parameter that needs to be passed to OrigCallRefresh
+	const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x0401C130, 0x18, 0x830, 0x820 } }; // Parameter that needs to be passed to OrigCallRefresh
+	MCC_CallRefreshFunction mOrigCallRefreshFunction; // We'll resolve this in constructor
 	uint64_t* mpCallRefreshFunctionParameter = nullptr;
 
 public:
@@ -50,32 +50,28 @@ public:
 			return;
 		}
 
-		PLOG_VERBOSE << "Performing CallRefreshFunction:";
+		PLOG_VERBOSE << "Performing CallRefreshFunction: parameter: " << std::hex << *mpCallRefreshFunctionParameter;
 		mOrigCallRefreshFunction(*mpCallRefreshFunctionParameter);
 		PLOG_VERBOSE << "CallRefreshFunction didn't crash!";
+
 	}
 
-
-	// Resolves CallRefreshFunction and its parameter
+	
+	// Constructor - Resolves CallRefreshFunction and the pointer to the parameter it needs
 	CustomGameRefresher()
 	{
 		
-		std::string errString;
 		void* pCallRefresh;
 		if (!mlp_OrigCallRefreshFunction.resolve(&pCallRefresh))
 		{
-			errString = "Couldn't resolve address of CallRefreshFunction : ";
-			errString += multilevel_pointer::GetLastError();
-			throw std::runtime_error(errString);
+			throw std::runtime_error(std::format("Couldn't resolve address of CallRefreshFunction : {}", multilevel_pointer::GetLastError()));
 		}
-		mOrigCallRefreshFunction = (CallRefreshFunction)pCallRefresh;
+		mOrigCallRefreshFunction = (MCC_CallRefreshFunction)pCallRefresh;
 
-		void* pCallFunctionParameter; // The address *IS* the parameter
+		void* pCallFunctionParameter; // We'll resolve the pointer but won't read off the value of the parameter until forceRefresh, since it isn't correct until you go to the CGB screen
 		if (!mlp_OrigCallRefreshParameter.resolve(&pCallFunctionParameter))
 		{
-			errString = "Couldn't resolve pointer to refresh function parameter : ";
-			errString += multilevel_pointer::GetLastError();
-			throw std::runtime_error(errString);
+			throw std::runtime_error(std::format("Couldn't resolve pointer to refresh function parameter : {}", multilevel_pointer::GetLastError()));
 		}
 		mpCallRefreshFunctionParameter = (uint64_t*)pCallFunctionParameter;
 

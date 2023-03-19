@@ -16,6 +16,9 @@
     <Filter Include="includes">
       <UniqueIdentifier>{b5b32e03-3939-422d-99b8-997316288e12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\safetyhook">
+      <UniqueIdentifier>{5bad8903-8675-4b68-ae6f-5d13452f461f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="command_handler.cpp">
@@ -32,6 +35,21 @@
     </ClCompile>
     <ClCompile Include="utilities.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\Builder.cpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\Factory.cpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\InlineHook.cpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\MidHook.cpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\ThreadFreezer.cpp">
+      <Filter>includes\safetyhook</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,5 +98,34 @@
     <ClInclude Include="CustomGameRefresher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="safetyhook-main\include\SafetyHook.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="safetyhook-main\include\safetyhook\Builder.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="safetyhook-main\include\safetyhook\Context.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="safetyhook-main\include\safetyhook\Factory.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="safetyhook-main\include\safetyhook\InlineHook.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="safetyhook-main\include\safetyhook\MidHook.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="safetyhook-main\include\safetyhook\ThreadFreezer.hpp">
+      <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safetyhook-main\src\MidHook.x64.asm">
+      <Filter>includes\safetyhook</Filter>
+    </None>
+    <None Include="safetyhook-main\src\MidHook.x86.asm">
+      <Filter>includes\safetyhook</Filter>
+    </None>
   </ItemGroup>
 </Project>

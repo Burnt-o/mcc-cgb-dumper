@@ -1,22 +1,9 @@
 #pragma once
 #include "pch.h"
 #include "command_handler.h"
-#include "dumper.h"
 #include "CustomGameRefresher.h"
 
-class CommandForceDump : public CommandBase {
-public:
-	CommandForceDump() {
-		SetName("forcedump");
-		SetHelp("forcedump ~ Forces a dump of CGB data. ");
-	}
 
-	void execute(const std::string& line) final
-	{
-		dumper::dump();
-		std::cout << "Dump forced" << std::endl;
-	}
-};
 
 
 class CommandExit : public CommandBase {
@@ -70,12 +57,12 @@ private:
 public:
 	explicit CommandForceRefresh(std::shared_ptr<CustomGameRefresher> instance) : customGameRefresherInstance(instance) {
 		SetName("force_refresh");
-		SetHelp("force_refresh ~ Force a CGB refresh by simulating a click where the button should be. ");
+		SetHelp("force_refresh ~ Force the custom game browser to refresh. ");
 	}
 
 	void execute(const std::string& line) final
 	{
-		std::cout << "Simulating refresh button mouse click." << std::endl;
+		std::cout << "Forcing CGB refresh." << std::endl << std::endl;
 		customGameRefresherInstance.get()->forceRefresh();
 	}
 };

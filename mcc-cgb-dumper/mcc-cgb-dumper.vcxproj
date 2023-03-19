@@ -118,8 +118,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,8 +136,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +151,26 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="dumper.cpp" />
     <ClCompile Include="multilevel_pointer.cpp" />
+    <ClCompile Include="safetyhook-main\src\Builder.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\Factory.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\InlineHook.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\MidHook.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="safetyhook-main\src\ThreadFreezer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,7 +188,18 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="multilevel_pointer.h" />
     <ClInclude Include="CustomGameRefresher.h" />
+    <ClInclude Include="safetyhook-main\include\SafetyHook.hpp" />
+    <ClInclude Include="safetyhook-main\include\safetyhook\Builder.hpp" />
+    <ClInclude Include="safetyhook-main\include\safetyhook\Context.hpp" />
+    <ClInclude Include="safetyhook-main\include\safetyhook\Factory.hpp" />
+    <ClInclude Include="safetyhook-main\include\safetyhook\InlineHook.hpp" />
+    <ClInclude Include="safetyhook-main\include\safetyhook\MidHook.hpp" />
+    <ClInclude Include="safetyhook-main\include\safetyhook\ThreadFreezer.hpp" />
     <ClInclude Include="utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="safetyhook-main\src\MidHook.x64.asm" />
+    <None Include="safetyhook-main\src\MidHook.x86.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

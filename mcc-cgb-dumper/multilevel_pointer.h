@@ -4,11 +4,12 @@
 
 
 
-enum class pointer_type { BASE_OFFSET, EXE_OFFSET};
+
 
 
 class multilevel_pointer {
 private:
+	enum class pointer_type { BASE_OFFSET, EXE_OFFSET };
 	static void* mEXEAddress;
 	static inline std::stringstream mLastError{};
 	static std::stringstream* SetLastErrorByRef()

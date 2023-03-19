@@ -3,7 +3,7 @@
 #include "global_kill.h"
 #include "command_handler.h"
 #include "commands.h"
-
+#include "dumper.h"
 
 
 
@@ -50,6 +50,7 @@ void RealMain() {
 		init_logging();
 		PLOG_INFO << "mcc-cgb-dumper initializing";
 
+		// Construct the CustomGameRefresher (automatically forces the game to refresh the CGB)
 		std::shared_ptr<CustomGameRefresher> customGameRefresher;
 		try
 		{
@@ -66,6 +67,26 @@ void RealMain() {
 			stop_logging();
 			return;
 		}
+
+		// Construct the AutoDumper (automatically parses CG info to json file whenever the CGB is refreshed)
+		std::shared_ptr<AutoDumper> autoDumper;
+		try
+		{
+			autoDumper = std::make_shared<AutoDumper>();
+		}
+		catch (std::runtime_error& ex)
+		{
+			PLOG_ERROR << "autoDumper failed to initialize, error: ";
+			PLOG_ERROR << ex.what();
+
+			PLOG_ERROR << "Enter any command to exit";
+			std::string dontCare;
+			std::cin >> dontCare;
+			stop_logging();
+			return;
+		}
+
+		std::cout << "Refresh function hooked: Custom Game info will be dumped to json whenever CGB is refreshed. " << std::endl;
 		
 
 		std::vector<std::unique_ptr<CommandBase>> commandList;
