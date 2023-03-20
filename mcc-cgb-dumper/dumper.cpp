@@ -87,11 +87,11 @@ struct Pointers
 
 
 
-void WriteJsonToFile(json j)
+void WriteJsonToFile(json j, std::string_view const &path)
 {
 	PLOG_VERBOSE << "Writing JSON data to file";
-
-	std::ofstream outFile("CustomGameBrowserData.json");
+	
+	std::ofstream outFile(path.data());
 	if (outFile.is_open())
 	{
 		outFile << j.dump(4);
@@ -100,7 +100,7 @@ void WriteJsonToFile(json j)
 	}
 	else
 	{
-		PLOG_ERROR << "Failed to open file : " << GetLastError();
+		PLOG_ERROR << "Failed to open file : " << GetLastError() << std::endl << "at: " << path;
 	}
 }
 
@@ -261,6 +261,15 @@ void AutoDumper::dump()
 	master.emplace_back(std::pair("CustomGameCount", CustomGameInfo_ElementIndex - 1));
 	master.emplace_back(std::pair("CustomGameArray", CustomGameInfoArray_Json));
 
-	WriteJsonToFile(master);
+	if (this->mJsonDumpPath == "")
+	{
+		WriteJsonToFile(master, "CustomGameBrowserData.json"); // default is in MCC install dir
+	}
+	else
+	{
+		WriteJsonToFile(master, this->mJsonDumpPath);
+	}
+
+
 
 }

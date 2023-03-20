@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "command_handler.h"
 #include "CustomGameRefresher.h"
-
+#include "dumper.h"
 
 
 
@@ -48,6 +48,30 @@ public:
 	}
 };
 
+class CommandSetJsonPath : public CommandBase {
+
+private: 
+	std::shared_ptr<AutoDumper> autoDumperInstance;
+
+public:
+	explicit CommandSetJsonPath(std::shared_ptr<AutoDumper> instance) : autoDumperInstance(instance) {
+		SetName("set_dump_dir");
+		SetHelp("set_dump_dir <path> ~ Set the directory that the CGB json data should be dumped to. ");
+	}
+
+	void execute(const std::string& line) final
+	{
+
+		if (this->autoDumperInstance.get()->setJsonDumpPath(line))
+		{
+			std::cout << "Successfully set json dump directory to " << line << std::endl;
+		}
+		else
+		{
+			std::cout << "Failed to set json dump directory to " << line << std::endl;
+		}
+	}
+};
 
 
 class CommandForceRefresh : public CommandBase {

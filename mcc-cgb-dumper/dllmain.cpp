@@ -92,6 +92,7 @@ void RealMain() {
 		std::vector<std::unique_ptr<CommandBase>> commandList;
 		commandList.emplace_back(std::make_unique<CommandExit>());
 		commandList.emplace_back(std::make_unique<CommandLoggingLevel>());
+		commandList.emplace_back(std::make_unique<CommandSetJsonPath>(autoDumper));
 		commandList.emplace_back(std::make_unique<CommandForceRefresh>(customGameRefresher));
 		commandList.emplace_back(std::make_unique<CommandAutoRefreshEnable>(customGameRefresher));
 		commandList.emplace_back(std::make_unique<CommandAutoRefreshDisable>(customGameRefresher));

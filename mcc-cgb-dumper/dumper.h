@@ -46,6 +46,8 @@
 		// hook object
 		static safetyhook::InlineHook mUpdateCustomGameArrayHook;
 
+		std::string mJsonDumpPath = "";
+
 	public:
 		
 		// Constructor - attaches hook and sets up thread
@@ -78,6 +80,27 @@
 			{
 				// Join and wait for it to die
 				this->mDumpQueueThread.join();
+			}
+		}
+
+		bool setJsonDumpPath(std::string_view const &path)
+		{
+			// Validate input (path is a valid directory)
+			PLOG_DEBUG << "setJsonDumpPath passed following path: " << path;
+			std::string testPath(path.data());
+			testPath.append("//CustomGameBrowserData.json");
+			std::ofstream outFile(std::format(testPath));
+			if (outFile.is_open())
+			{
+				outFile.close();
+				PLOG_DEBUG << "path is valid";
+				mJsonDumpPath.assign(testPath);
+				return true;
+			}
+			else
+			{
+				PLOG_ERROR << "Failed to open path : " << GetLastError();
+				return false;
 			}
 		}
 
