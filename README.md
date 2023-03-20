@@ -13,5 +13,7 @@ Pointer data is built in at the moment so any MCC updates will break this tool u
 Includes: [SafetyHook](https://github.com/cursey/safetyhook), [Plog](https://github.com/SergiusTheBest/plog), [json](https://github.com/nlohmann/json), [date.h](https://github.com/HowardHinnant/date)
 
 # How do I use it?
+This tool needs MCC to be running with EAC disabled - unfortunately EAC disabled mode also disables the CGB. So first we need to fix this: copy the easyanticheat_xXX.dll's to "%MCCinstalldir%/easyanticheat". Make sure to back them up for when you want to play with EAC on.
+
 Boot up MCC and navigate to the CGB menu. Inject mcc-cgb-dumper with either the provided injector or any dll injector of your choice. A console will open up, if initialization is successful then you should see a list of commands you can enter, such as forcing a refresh or setting up a timer to automatically refresh the CGB every however-many seconds. 
-Whenever the CGB is refreshed, the data will be automatically dumped to a json file that will be stored in MCC's steam install directory, named "CustomGameBrowser.json".
+Whenever the CGB is refreshed, the data will be automatically dumped to a json file that will be stored in MCC's steam install directory, named "CustomGameBrowser.json". You can change this path with set_dump_dir. 
