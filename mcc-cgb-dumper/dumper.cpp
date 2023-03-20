@@ -205,7 +205,7 @@ void AutoDumper::dump()
 		{
 			// This is what ends the do-while loop; we iterate through all the valid CustomGames, 
 				// and stop once we reach an invalid one (luckily all the valid ones are grouped together at the start of the array)
-			PLOG_DEBUG << "Found end of CustomGameInfoArray struct, total custom games: " << (CustomGameInfo_ElementIndex + 1) << ", validFlag value: " << validFlag;
+			PLOG_DEBUG << "Found end of CustomGameInfoArray struct, total custom games: " << (CustomGameInfo_ElementIndex - 1) << ", validFlag value: " << validFlag;
 
 			break;
 		}

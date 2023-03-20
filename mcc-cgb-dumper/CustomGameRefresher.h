@@ -35,23 +35,27 @@ private:
 	}
 
 
-	const multilevel_pointer mlp_OrigCallRefreshFunction{ { 0xA92EA8 } }; // Pointer to OrigCallRefresh
+	//const multilevel_pointer mlp_OrigCallRefreshFunction{ { 0xA92EA8 } }; // Pointer to OrigCallRefresh
+	const multilevel_pointer mlp_OrigCallRefreshFunction{ { 0xA785A4 } }; // Pointer to OrigCallRefresh
 	//const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x03B227C8, 0x90, 0xB0 } }; // Parameter that needs to be passed to OrigCallRefresh
-	const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x0401C130, 0x18, 0x830, 0x820 } }; // Parameter that needs to be passed to OrigCallRefresh
+	//const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x0401C130, 0x18, 0x830, 0x820 } }; // Parameter that needs to be passed to OrigCallRefresh
+	const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x03D0B6A0, 0x28, 0xE90, 0x0 } }; // Parameter that needs to be passed to OrigCallRefresh
 	MCC_CallRefreshFunction mOrigCallRefreshFunction; // We'll resolve this in constructor
-	uint64_t* mpCallRefreshFunctionParameter = nullptr;
 
 public:
 	void forceRefresh() const // Calls the games CallRefreshFunction
 	{
-		if (IsBadReadPtr(mpCallRefreshFunctionParameter, sizeof(uint64_t)))
+		void* parameter;
+		if (!mlp_OrigCallRefreshParameter.resolve(&parameter))
 		{
 			PLOG_ERROR << "forceRefresh failed, couldn't read parameter";
 			return;
 		}
 
-		PLOG_VERBOSE << "Performing CallRefreshFunction: parameter: " << std::hex << *mpCallRefreshFunctionParameter;
-		mOrigCallRefreshFunction(*mpCallRefreshFunctionParameter);
+
+
+		PLOG_VERBOSE << "Performing CallRefreshFunction: parameter: " << std::hex << parameter;
+		mOrigCallRefreshFunction((uint64_t)parameter);
 		PLOG_VERBOSE << "CallRefreshFunction didn't crash!";
 
 	}
@@ -68,12 +72,6 @@ public:
 		}
 		mOrigCallRefreshFunction = (MCC_CallRefreshFunction)pCallRefresh;
 
-		void* pCallFunctionParameter; // We'll resolve the pointer but won't read off the value of the parameter until forceRefresh, since it isn't correct until you go to the CGB screen
-		if (!mlp_OrigCallRefreshParameter.resolve(&pCallFunctionParameter))
-		{
-			throw std::runtime_error(std::format("Couldn't resolve pointer to refresh function parameter : {}", multilevel_pointer::GetLastError()));
-		}
-		mpCallRefreshFunctionParameter = (uint64_t*)pCallFunctionParameter;
 
 		mAutoRefreshThread = std::thread([this] { this->autoRefreshThreadTask(); }); // Thread is born when this class is constructed, only AFTER possible throws
 
