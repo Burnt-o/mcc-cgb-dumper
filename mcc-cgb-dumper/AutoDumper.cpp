@@ -127,6 +127,7 @@ void AutoDumper::dump()
 				json_mapInfoElement["MapName"] = mapInfoElement->mapName.copy();
 				json_mapInfoElement["MapBaseName"] = mapInfoElement->mapBaseName.copy();
 				json_mapInfoElement["MapDescription"] = mapInfoElement->mapDescription.copy();
+				json_mapInfoElement["MapIndex"] = mapCount - 1;
 				json_mapInfoArray.emplace_back(json_mapInfoElement);
 
 				if (variantCount - 1 == customGameInfoElement->currentlyPlayingVariantIndex && mapCount - 1 == customGameInfoElement->currentlyPlayingMapIndex)
