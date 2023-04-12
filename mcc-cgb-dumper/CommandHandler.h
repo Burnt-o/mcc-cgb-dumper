@@ -37,5 +37,6 @@ public:
     explicit CommandHandler(const std::vector<std::unique_ptr<CommandBase>>& commandList) : mCommandList(commandList) {}
     void help() const;
     void handleCommands() const;
+    void inputThread();
 };
 

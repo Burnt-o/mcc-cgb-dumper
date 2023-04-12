@@ -1,5 +1,5 @@
 #pragma once
-#include "multilevel_pointer.h"
+#include "MultilevelPointer.h"
 
 // Defines a CustomGameRefresh class that can force the CustomGameBrowser to refresh
 // using a call to the MCC function that performs it.
@@ -34,28 +34,35 @@ private:
 		PLOG_DEBUG << "CustomGameRefresher->mAutoRefreshThread concluded";
 	}
 
+	safetyhook::MidHook getParameterHook;
+	static void getParameterHookFunction(safetyhook::Context64& ctx)
+	{
+		if (!parameterToPass)
+		{
+			parameterToPass = ctx.rcx;
+			PLOG_DEBUG << "parameter captured: " << parameterToPass;
+		}
 
-	//const multilevel_pointer mlp_OrigCallRefreshFunction{ { 0xA92EA8 } }; // Pointer to OrigCallRefresh
-	const multilevel_pointer mlp_OrigCallRefreshFunction{ { 0xA785A4 } }; // Pointer to OrigCallRefresh
-	//const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x03B227C8, 0x90, 0xB0 } }; // Parameter that needs to be passed to OrigCallRefresh
-	//const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x0401C130, 0x18, 0x830, 0x820 } }; // Parameter that needs to be passed to OrigCallRefresh
-	const multilevel_pointer mlp_OrigCallRefreshParameter{ { 0x03D0B6A0, 0x28, 0xE90, 0x0 } }; // Parameter that needs to be passed to OrigCallRefresh
+	}
+
+
+	const MultilevelPointer mlp_OrigCallRefreshFunction{ { 0xA785A4 } }; // Pointer to OrigCallRefresh
+	static uint64_t parameterToPass;
+
 	MCC_CallRefreshFunction mOrigCallRefreshFunction; // We'll resolve this in constructor
 
 public:
 	void forceRefresh() const // Calls the games CallRefreshFunction
 	{
-		void* parameter;
-		if (!mlp_OrigCallRefreshParameter.resolve(&parameter))
+		if (!parameterToPass)
 		{
-			PLOG_ERROR << "forceRefresh failed, couldn't read parameter";
+			PLOG_ERROR << "Cannot force refresh until refresh has been manually called at least once";
 			return;
 		}
 
 
-
-		PLOG_VERBOSE << "Performing CallRefreshFunction: parameter: " << std::hex << parameter;
-		mOrigCallRefreshFunction((uint64_t)parameter);
+		PLOG_VERBOSE << "Performing CallRefreshFunction: parameter: " << std::hex << parameterToPass;
+		mOrigCallRefreshFunction(parameterToPass);
 		PLOG_VERBOSE << "CallRefreshFunction didn't crash!";
 
 	}
@@ -64,14 +71,17 @@ public:
 	// Constructor - Resolves CallRefreshFunction and the pointer to the parameter it needs
 	CustomGameRefresher()
 	{
-		
+		parameterToPass = 0;
 		void* pCallRefresh;
 		if (!mlp_OrigCallRefreshFunction.resolve(&pCallRefresh))
 		{
-			throw std::runtime_error(std::format("Couldn't resolve address of CallRefreshFunction : {}", multilevel_pointer::GetLastError()));
+			throw std::runtime_error(std::format("Couldn't resolve address of CallRefreshFunction : {}", MultilevelPointer::GetLastError()));
 		}
 		mOrigCallRefreshFunction = (MCC_CallRefreshFunction)pCallRefresh;
 
+		// Set up hook to capture the parameter that needs to be passed to the function by hooking the function
+		auto builder = SafetyHookFactory::acquire();
+		getParameterHook = builder.create_mid(pCallRefresh, getParameterHookFunction);
 
 		mAutoRefreshThread = std::thread([this] { this->autoRefreshThreadTask(); }); // Thread is born when this class is constructed, only AFTER possible throws
 

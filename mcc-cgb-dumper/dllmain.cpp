@@ -1,11 +1,11 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
-#include "global_kill.h"
-#include "command_handler.h"
-#include "commands.h"
-#include "dumper.h"
-
-
+#include "GlobalKill.h"
+#include "CommandHandler.h"
+#include "Commands.h"
+#include "AutoDumper.h"
+#include "InitParameter.h"
+#include "ExportedFunctions.h"
 
 
 
@@ -46,9 +46,26 @@ void stop_logging()
 // Main Execution Loop
 void RealMain() {
 
+	// wait for init parameters from the injector
+	auto startTime = GetTickCount64();
+	constexpr ULONGLONG timeoutMilliseconds = 10 * 1000;
+	while (g_ourInitParameters == nullptr)
+	{
+		// Escape in case injector fails to call the Initialize function
+		if (GlobalKill::isKillSet() || GetTickCount64() - startTime > timeoutMilliseconds)
+		{
+			return;
+		}
+		Sleep(50);
+	}
+
+
+
 	{ // Enclosing scope for used resources
 		init_logging();
 		PLOG_INFO << "mcc-cgb-dumper initializing";
+		PLOG_DEBUG << "initParam::injectorPath: " << std::string(g_ourInitParameters->injectorPath);
+
 
 		// Construct the CustomGameRefresher (automatically forces the game to refresh the CGB)
 		std::shared_ptr<CustomGameRefresher> customGameRefresher;
@@ -86,7 +103,18 @@ void RealMain() {
 			return;
 		}
 
-		std::cout << "Refresh function hooked: Custom Game info will be dumped to json whenever CGB is refreshed. " << std::endl;
+		// Load the config file if it exists and set the autoDumpers json path to stored value
+		std::ifstream inFile(std::string(g_ourInitParameters->injectorPath) + "\\mcc-cgb-dumper.cfg");
+		if (inFile.is_open())
+		{
+			std::string value;
+			std::getline(inFile, value);
+			PLOG_DEBUG << "read value from config file: " << value;
+			autoDumper.get()->setJsonDumpPath(value);
+		}
+
+		
+		std::cout << std::format("Refresh function hooked: Custom Game info will be dumped to json file {}{} whenever CGB is refreshed. ", autoDumper.get()->getJsonDumpPath(), "CustomGameBrowserData.json") << std::endl;
 		
 
 		std::vector<std::unique_ptr<CommandBase>> commandList;
@@ -103,11 +131,23 @@ void RealMain() {
 
 		std::cout << "Logging level set to: " << plog::severityToString(plog::get()->getMaxSeverity()) << std::endl;
 
-		// Run/wait for commands, until global kill is set by "exit" command
-		while (!global_kill::is_kill_set()) {
-			PLOG_VERBOSE << "Ready to process new command.";
+
+		// Run/wait for commands, until global kill is set by "exit" command.
+		// Altho handleCommands IS blocking so this only works if user types exit, external global kill won't work.
+		// Progam lives in this loop 99% of the time.
+		while (!GlobalKill::isKillSet()) {
+			PLOG_INFO << "Ready to process new command";
 			commandHandler.handleCommands();
 		}
+
+		// Store the autodumpers json path to config file
+		std::ofstream outFile(std::string(g_ourInitParameters->injectorPath) + "mcc-cgb-dumper.cfg");
+		if (outFile.is_open())
+		{
+			outFile << autoDumper.get()->getJsonDumpPath();
+		}
+
+
 	}
 	// Any used resources should be out of scope now, ie unique_ptrs and shared_ptrs should be dead
 	// So we just need to cleanup anything that we have to do manually

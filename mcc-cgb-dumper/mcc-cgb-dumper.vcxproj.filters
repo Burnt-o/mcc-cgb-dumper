@@ -19,21 +19,21 @@
     <Filter Include="includes\safetyhook">
       <UniqueIdentifier>{5bad8903-8675-4b68-ae6f-5d13452f461f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\plog">
+      <UniqueIdentifier>{03b86250-cc75-4ac5-899b-f107c9bc5bd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="command_handler.cpp">
+    <ClCompile Include="CommandHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dumper.cpp">
+    <ClCompile Include="AutoDumper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="multilevel_pointer.cpp">
+    <ClCompile Include="MultilevelPointer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="safetyhook-main\src\Builder.cpp">
@@ -51,49 +51,34 @@
     <ClCompile Include="safetyhook-main\src\ThreadFreezer.cpp">
       <Filter>includes\safetyhook</Filter>
     </ClCompile>
+    <ClCompile Include="ExportedFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InitParameter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomGameRefresher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dumper.h">
+    <ClInclude Include="AutoDumper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="command_handler.h">
+    <ClInclude Include="CommandHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="multilevel_pointer.h">
+    <ClInclude Include="MultilevelPointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="global_kill.h">
+    <ClInclude Include="GlobalKill.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utilities.h">
+    <ClInclude Include="Commands.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="commands.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\Init.h">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\Log.h">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\Logger.h">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\Record.h">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\Severity.h">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\Util.h">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\plog\WinApi.h">
-      <Filter>includes</Filter>
     </ClInclude>
     <ClInclude Include="CustomGameRefresher.h">
       <Filter>Header Files</Filter>
@@ -118,6 +103,36 @@
     </ClInclude>
     <ClInclude Include="safetyhook-main\include\safetyhook\ThreadFreezer.hpp">
       <Filter>includes\safetyhook</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Init.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Log.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Logger.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Record.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Severity.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\Util.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plog\WinApi.h">
+      <Filter>includes\plog</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportedFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InitParameter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomGameInfoStructs.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

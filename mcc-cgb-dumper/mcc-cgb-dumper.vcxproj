@@ -78,9 +78,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\net6.0</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\net6.0</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -118,12 +120,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\mauri\source\repos\PDCurses-3.9\PDCurses-3.9;$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\mauri\source\repos\PDCurses-3.9\PDCurses-3.9\wincon;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pdcurses.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,21 +140,26 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\mauri\source\repos\PDCurses-3.9\PDCurses-3.9;$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\mauri\source\repos\PDCurses-3.9\PDCurses-3.9\wincon;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>pdcurses.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="command_handler.cpp" />
+    <ClCompile Include="CommandHandler.cpp" />
+    <ClCompile Include="CustomGameRefresher.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="dumper.cpp" />
-    <ClCompile Include="multilevel_pointer.cpp" />
+    <ClCompile Include="AutoDumper.cpp" />
+    <ClCompile Include="ExportedFunctions.cpp" />
+    <ClCompile Include="InitParameter.cpp" />
+    <ClCompile Include="MultilevelPointer.cpp" />
     <ClCompile Include="safetyhook-main\src\Builder.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -171,13 +180,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="commands.h" />
-    <ClInclude Include="command_handler.h" />
-    <ClInclude Include="dumper.h" />
-    <ClInclude Include="global_kill.h" />
+    <ClInclude Include="Commands.h" />
+    <ClInclude Include="CommandHandler.h" />
+    <ClInclude Include="CustomGameInfoStructs.h" />
+    <ClInclude Include="AutoDumper.h" />
+    <ClInclude Include="ExportedFunctions.h" />
+    <ClInclude Include="GlobalKill.h" />
     <ClInclude Include="include\plog\Init.h" />
     <ClInclude Include="include\plog\Log.h" />
     <ClInclude Include="include\plog\Logger.h" />
@@ -185,8 +195,9 @@
     <ClInclude Include="include\plog\Severity.h" />
     <ClInclude Include="include\plog\Util.h" />
     <ClInclude Include="include\plog\WinApi.h" />
+    <ClInclude Include="InitParameter.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="multilevel_pointer.h" />
+    <ClInclude Include="MultilevelPointer.h" />
     <ClInclude Include="CustomGameRefresher.h" />
     <ClInclude Include="safetyhook-main\include\SafetyHook.hpp" />
     <ClInclude Include="safetyhook-main\include\safetyhook\Builder.hpp" />
@@ -195,7 +206,6 @@
     <ClInclude Include="safetyhook-main\include\safetyhook\InlineHook.hpp" />
     <ClInclude Include="safetyhook-main\include\safetyhook\MidHook.hpp" />
     <ClInclude Include="safetyhook-main\include\safetyhook\ThreadFreezer.hpp" />
-    <ClInclude Include="utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="safetyhook-main\src\MidHook.x64.asm" />

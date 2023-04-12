@@ -1,7 +1,7 @@
 #pragma once
-#include "global_kill.h"
-#include "multilevel_pointer.h"
-
+#include "GlobalKill.h"
+#include "MultilevelPointer.h"
+#include "InitParameter.h"
 
 	// Hooks the MCC function that populates the CustomGameServer info so we know when to dump it all to json
 	class AutoDumper {
@@ -30,7 +30,7 @@
 			}
 		}
 
-		const multilevel_pointer mlp_OrigUpdateCustomGameArray{ { 0x2705C8} }; // Pointer to original MCC_UpdateCustomGameArray
+		const MultilevelPointer mlp_OrigUpdateCustomGameArray{ { 0x2705C8} }; // Pointer to original MCC_UpdateCustomGameArray
 		static MCC_UpdateCustomGameArray mOrigUpdateCustomGameArray; // The Original UpdateCustomGameArray, will resolve this in constructer and set up hook there so it's redirected to hkUpdateCustomGameArray
 		
 		// Our hook, we'll let the games UpdateCustomGameArray run then queue a dump to happen in our thread
@@ -46,17 +46,20 @@
 		// hook object
 		static safetyhook::InlineHook mUpdateCustomGameArrayHook;
 
-		std::string mJsonDumpPath = "";
+		std::string mJsonDumpPath;
 
 	public:
 		
 		// Constructor - attaches hook and sets up thread
 		AutoDumper()
 		{
+			mJsonDumpPath = std::string(g_ourInitParameters->injectorPath);
+
+
 			void* pOrigUpdateCustomGameArray;
 			if (!this->mlp_OrigUpdateCustomGameArray.resolve(&pOrigUpdateCustomGameArray))
 			{
-				throw std::runtime_error(std::format("Couldn't resolve address of mlp_OrigUpdateCustomGameArray : {}", multilevel_pointer::GetLastError()));
+				throw std::runtime_error(std::format("Couldn't resolve address of mlp_OrigUpdateCustomGameArray : {}", MultilevelPointer::GetLastError()));
 			}
 			AutoDumper::mOrigUpdateCustomGameArray = (MCC_UpdateCustomGameArray)pOrigUpdateCustomGameArray;
 
@@ -89,12 +92,12 @@
 			PLOG_DEBUG << "setJsonDumpPath passed following path: " << path;
 			std::string testPath(path.data());
 			testPath.append("//CustomGameBrowserData.json");
-			std::ofstream outFile(std::format(testPath));
+			std::ofstream outFile(testPath);
 			if (outFile.is_open())
 			{
 				outFile.close();
 				PLOG_DEBUG << "path is valid";
-				mJsonDumpPath.assign(testPath);
+				mJsonDumpPath.assign(path);
 				return true;
 			}
 			else
@@ -102,6 +105,11 @@
 				PLOG_ERROR << "Failed to open path : " << GetLastError();
 				return false;
 			}
+		}
+
+		const std::string_view getJsonDumpPath()
+		{
+			return mJsonDumpPath;
 		}
 
 

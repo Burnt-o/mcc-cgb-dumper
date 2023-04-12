@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "command_handler.h"
+#include "CommandHandler.h"
 
-
+#include "GlobalKill.h"
 
 
 
@@ -44,11 +44,11 @@
 
     void CommandHandler::handleCommands() const {
 
-        if (mCommandList.empty()) return;
 
-        std::string userCommand;
-        std::string userParameters;
+            if (mCommandList.empty()) return;
 
+            std::string userCommand;
+            std::string userParameters;
 
             std::cin >> userCommand;
             std::getline(std::cin, userParameters);
@@ -56,7 +56,7 @@
             //Remove any preceeding whitespace.
             auto pos = userParameters.find_first_not_of(' ');
             userParameters = userParameters.substr(pos != std::string::npos ? pos : 0); // Had to adjust this line as bind1st was deprecated
-          
+
 
             bool foundCommand = false;
             // Loop through our commandlist and check if we have a match
@@ -77,7 +77,6 @@
                 PLOG_ERROR << "The command: " << userCommand << " was not reconized. Please try again.";
                 help();
             }
-
 
         
     }

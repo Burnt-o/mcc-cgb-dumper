@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "multilevel_pointer.h"
+#include "MultilevelPointer.h"
 
-void* multilevel_pointer::mEXEAddress = nullptr;
+void* MultilevelPointer::mEXEAddress = nullptr;
 
 
-bool multilevel_pointer::dereference_pointer(void* base, std::vector<int64_t> offsets, void** resolvedOut) const
+bool MultilevelPointer::dereference_pointer(void* base, std::vector<int64_t> offsets, void** resolvedOut) const
 {
 	uintptr_t baseAddress = (uintptr_t)base; //cast to uintptr_t so we can do math to it
 	if (offsets.size() > 0)
@@ -51,7 +51,7 @@ bool multilevel_pointer::dereference_pointer(void* base, std::vector<int64_t> of
 }
 
 
-bool multilevel_pointer::resolve(void** resolvedOut) const
+bool MultilevelPointer::resolve(void** resolvedOut) const
 {
 	if (!mEXEAddress)
 	{
@@ -76,7 +76,7 @@ bool multilevel_pointer::resolve(void** resolvedOut) const
 }
 
 
-void multilevel_pointer::updateBaseAddress(void* const& baseAddress)
+void MultilevelPointer::updateBaseAddress(void* const& baseAddress)
 {
 	if (this->mPointerType != pointer_type::BASE_OFFSET) throw;
 	this->mBaseAddress = baseAddress;
@@ -86,7 +86,7 @@ void multilevel_pointer::updateBaseAddress(void* const& baseAddress)
 
 // overload for string case
 
-bool multilevel_pointer::readString(std::string& resolvedOut) const
+bool MultilevelPointer::readString(std::string& resolvedOut) const
 {
 
 

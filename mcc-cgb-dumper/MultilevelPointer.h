@@ -7,7 +7,7 @@
 
 
 
-class multilevel_pointer {
+class MultilevelPointer {
 private:
 	enum class pointer_type { BASE_OFFSET, EXE_OFFSET };
 	static void* mEXEAddress;
@@ -29,12 +29,12 @@ private:
 public:
 
 
-	explicit multilevel_pointer(const std::vector<int64_t>& offsets)
+	explicit MultilevelPointer(const std::vector<int64_t>& offsets)
 		: mBaseAddress(nullptr), mOffsets(offsets), mPointerType(pointer_type::EXE_OFFSET)
 	{
 	}
 
-	explicit multilevel_pointer(void* const& baseAddress, const std::vector<int64_t>& offsets)
+	explicit MultilevelPointer(void* const& baseAddress, const std::vector<int64_t>& offsets)
 		: mBaseAddress(baseAddress), mOffsets(offsets), mPointerType(pointer_type::BASE_OFFSET)
 	{
 	}

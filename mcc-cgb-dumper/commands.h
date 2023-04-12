@@ -1,8 +1,8 @@
 #pragma once
 #include "pch.h"
-#include "command_handler.h"
+#include "CommandHandler.h"
 #include "CustomGameRefresher.h"
-#include "dumper.h"
+#include "AutoDumper.h"
 
 
 
@@ -17,7 +17,7 @@ public:
 	void execute(const std::string& line) final
 	{
 		std::cout << "Exiting" << std::endl;
-		global_kill::kill_me();
+		GlobalKill::killMe();
 	}
 };
 
