@@ -4,7 +4,7 @@
 // This is how MCC does it's short-string-optimization.
 // The first 0x10 bytes are a buffer, if the string is less than 0x10 chars
 // it's stored right there. Otherwise the first 8 bytes are a pointer to the chars.
-struct MCCString {
+struct MCCString { 
 	union
 	{
 		char shortString [0x10];
