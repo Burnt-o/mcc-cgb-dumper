@@ -3,7 +3,7 @@
 #include "AutoDumper.h"
 #include "MultilevelPointer.h"
 #include "CustomGameInfoStructs.h"
-
+#include "PointerData.h"
 
 
 
@@ -21,9 +21,6 @@ AutoDumper::MCC_UpdateCustomGameArray AutoDumper::mOrigUpdateCustomGameArray = n
 
 
 
-// Pointers to stuff in the CustomGameInfoArray so we can read all the data we need
-	const MultilevelPointer mlp_CustomGameInfoArrayStart{ { 0x03F7FF18 , 0x40, 0x0 } }; // the beginning of the array of CGB objects
-	const MultilevelPointer mlp_CustomGameInfoArrayEnd{ { 0x03F7FF18 , 0x40, 0x0 } };
 
 
 

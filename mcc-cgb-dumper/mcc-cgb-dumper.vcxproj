@@ -122,6 +122,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>C:\Users\mauri\source\repos\PDCurses-3.9\PDCurses-3.9;$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,6 +143,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>C:\Users\mauri\source\repos\PDCurses-3.9\PDCurses-3.9;$(SolutionDir)\safetyhook-main\include;$(SolutionDir)\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -199,6 +201,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="MultilevelPointer.h" />
     <ClInclude Include="CustomGameRefresher.h" />
+    <ClInclude Include="PointerData.h" />
     <ClInclude Include="safetyhook-main\include\SafetyHook.hpp" />
     <ClInclude Include="safetyhook-main\include\safetyhook\Builder.hpp" />
     <ClInclude Include="safetyhook-main\include\safetyhook\Context.hpp" />

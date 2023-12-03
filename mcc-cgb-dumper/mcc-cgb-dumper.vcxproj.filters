@@ -134,6 +134,9 @@
     <ClInclude Include="CustomGameInfoStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PointerData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="safetyhook-main\src\MidHook.x64.asm">

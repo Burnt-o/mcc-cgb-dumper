@@ -40,46 +40,47 @@ struct MapInfo {
 	MCCString mapName;
 	MCCString mapBaseName;
 	MCCString mapDescription;
-	char unknown1[0x48];
+	char unknown1[0x68]; // used to be 48
 };
-static_assert(sizeof(MapInfo) == 0xA8);
+static_assert(sizeof(MapInfo) == 0xC8);
 
 
 struct VariantInfo {
-	char unknown1[0x20];
-	MCCString whichMCCGame;
-	MCCString variantName;
-	MCCString gameType;
-	MCCString gameTypeBaseType;
-	MCCString unknown; // seems to be a string used in map filtering?
-	MCCString gameTypeDescription;
-	char unknown2[0x30];
-	MapInfo* mapInfoArrayStart;
+	char unknown1[0x20]; //0x0
+	MCCString whichMCCGame; // 0x20
+	MCCString variantName; // 0x40
+	MCCString gameType; // 0x60
+	MCCString gameTypeBaseType; // 0x80
+	MCCString unknown; // 0xA0 seems to be a string used in map filtering?
+	MCCString unknown4; // 0xC0 new in 3272
+	MCCString gameTypeDescription; // 0xE0 
+	char unknown2[0x30]; //  0x100 
+	MapInfo* mapInfoArrayStart; // 0x130
 	MapInfo* mapInfoArrayEnd;
 	char unknown3[0x8]; // seems to be a copy of mapInfoArrayEnd
 };
-static_assert(sizeof(VariantInfo) == 0x128);
+static_assert(sizeof(VariantInfo) == 0x148);
 
 struct CustomGameInfo {
-	MCCString gameID;
-	MCCString customGameName;
-	MCCString serverDescription;
-	MCCString unknownUUID1;
-	MCCString serverRegionName;
-	MCCString isTeamChangingAllowed;
-	MCCString unknownUUID2; 
-	MCCString unknownUUID3;
-	MCCString serverRegion;
-	char playersInGame;
+	MCCString gameID; // 0x0
+	MCCString customGameName; // 0x20
+	MCCString serverDescription; // 0x40
+	MCCString unknownUUID1; // 0x60
+	MCCString serverRegionName; // 0x80
+	MCCString isTeamChangingAllowed; // 0xA0
+	MCCString unknownUUID2;  // 0xC0
+	MCCString unknownUUID3; // 0xE0
+	MCCString serverRegion; // 0x100
+	char playersInGame; // 0x120
 	char maxPlayers;
 	char unknown1[0x2];
-	uint32_t pingMilliseconds;
-	char unknown2[0x30];
-	VariantInfo* variantInfoArrayStart;
-	VariantInfo* variantInfoArrayEnd;
-	char unknown3[0x8]; // seems to be a copy of variantInfoArrayEnd
-	uint32_t currentlyPlayingVariantIndex;
-	uint32_t currentlyPlayingMapIndex;
-	char unknown4[0x38];
+	uint32_t pingMilliseconds; 
+	char unknown2[0x30]; // 0x128 .. used to be 0x30
+	VariantInfo* variantInfoArrayStart; // 0x158
+	VariantInfo* variantInfoArrayEnd; // 0x160
+	char unknown3[0x8]; // 0x168 seems to be a copy of variantInfoArrayEnd
+	uint32_t currentlyPlayingVariantIndex; // 0x170
+	uint32_t currentlyPlayingMapIndex; //0x174
+	char unknown4[0x30]; /// was 38
 };
-static_assert(sizeof(CustomGameInfo) == 0x1B0);
+static_assert(sizeof(CustomGameInfo) == 0x1A8);

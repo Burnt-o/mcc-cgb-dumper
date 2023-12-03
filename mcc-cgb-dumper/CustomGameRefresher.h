@@ -1,5 +1,6 @@
 #pragma once
 #include "MultilevelPointer.h"
+#include "PointerData.h"
 
 // Defines a CustomGameRefresh class that can force the CustomGameBrowser to refresh
 // using a call to the MCC function that performs it.
@@ -46,7 +47,7 @@ private:
 	}
 
 
-	const MultilevelPointer mlp_OrigCallRefreshFunction{ { 0xA785A4 } }; // Pointer to OrigCallRefresh
+
 	static uint64_t parameterToPass;
 
 	MCC_CallRefreshFunction mOrigCallRefreshFunction; // We'll resolve this in constructor
